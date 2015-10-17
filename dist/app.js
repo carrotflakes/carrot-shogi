@@ -168,7 +168,7 @@
 						});
 					}
 				}
-				this.pieces.splice.apply(this.pieces, [0, this.pieces.length].concat(newPieces));
+				this.pieces = newPieces;
 
 				var hl = position.history.length;
 				this.lastMoveIndex = hl > 0 ? position.history[hl - 1].toIdx : 0;

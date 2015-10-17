@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta charset="utf-8">
 <title>将棋</title>
 <style>
 
-#board {
+#game {
 -webkit-user-select: none;
 -moz-user-select: none;
 user-select: none;
 font-family: "ヒラギノ明朝 ProN W6", "HiraMinProN-W6", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", "MS 明朝", serif;
+}
+
+.svg-button {
+cursor: pointer;
 }
 
 .piece {
@@ -21,7 +26,7 @@ font-weight: bold;
 </style>
 </head>
 <body id="app">
-<svg id="board" v-cloak width="572" height="372">
+<svg id="game" v-cloak width="572" height="372">
   <defs>
 		<path id="pieceShape" stroke-width="2"
 					stroke-linejoin="round"
@@ -60,6 +65,24 @@ font-weight: bold;
 		<piece $data="{{$data}}" on-click="{{selectPiece}}"></piece>
 	</g>
 
+	<g class="svg-button" v-on="click: init">
+		<rect fill="#A7D8A5"
+					x="0" y="286" width="98" height="28" />
+		<text fill="#046142" x="6" y="306" font-size="15">指し直し</text>
+	</g>
+
+	<g class="svg-button" v-on="click: undo">
+		<rect fill="#A7D8A5"
+					x="0" y="315" width="98" height="28" />
+		<text fill="#046142" x="6" y="335" font-size="15">一手戻す</text>
+	</g>
+
+	<g class="svg-button" v-on="click: command('ai')">
+		<rect fill="#A7D8A5"
+					x="0" y="344" width="98" height="28" />
+		<text fill="#046142" x="6" y="364" font-size="15">AIが指す</text>
+	</g>
+
 	<g id="promotionSelector"
 		 v-show="promotionSelect.show"
 		 v-attr="transform: 'translate(' + promotionSelect.x + ', ' + promotionSelect.y + ')'">
@@ -73,10 +96,6 @@ font-weight: bold;
 	</g>
 </svg>
 <br>
-<button v-on="click: init">init</button>
-<button v-on="click: undo">undo</button>
-<button v-on="click: command('allMoves')">moves</button>
-<button v-on="click: command('ai')">ai</button>
 
 <script src="vue.min.js"></script>
 <script src="app.js"></script>
