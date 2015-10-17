@@ -961,12 +961,26 @@
 		return score;
 	}
 
-	function sortMoves(position, moves) {}
+	function sortMoves(position, mi1, mi2) {
+		while (mi1 < mi2) {
+			if (moveArray[mi1 + 4] === 0) {
+				mi1 += 5;
+			} else {
+				var tmp = undefined;
+				mi2 -= 5;
+				tmp = moveArray[mi1 + 0];moveArray[mi1 + 0] = moveArray[mi2 + 0];moveArray[mi2 + 0] = tmp;
+				tmp = moveArray[mi1 + 1];moveArray[mi1 + 1] = moveArray[mi2 + 1];moveArray[mi2 + 1] = tmp;
+				tmp = moveArray[mi1 + 2];moveArray[mi1 + 2] = moveArray[mi2 + 2];moveArray[mi2 + 2] = tmp;
+				tmp = moveArray[mi1 + 3];moveArray[mi1 + 3] = moveArray[mi2 + 3];moveArray[mi2 + 3] = tmp;
+				tmp = moveArray[mi1 + 4];moveArray[mi1 + 4] = moveArray[mi2 + 4];moveArray[mi2 + 4] = tmp;
+			}
+		}
+	}
 
 	function search(position, depth, alpha, beta, mi) {
 		if (depth === 0) return evalPosition(position);
 		var mi2 = position.allMoves(moveArray, mi);
-		//sortMoves(position, moves);
+		//sortMoves(position, mi, mi2);
 
 		for (var i = mi; i < mi2; i += 5) {
 			position.move_(moveArray, i);
@@ -982,7 +996,7 @@
 
 	function ai(position, depth) {
 		var mi = position.allMoves(moveArray, 0);
-		//sortMoves(position, moves);
+		//sortMoves(position, 0, mi);
 
 		var bestMove = 0,
 		    alpha = -4096;
