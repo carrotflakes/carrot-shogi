@@ -93,7 +93,7 @@ var appVm = new Vue({
 						x: 512 + 6 * j,
 						y: 372 - 22 - i * 40,
 						index: i ^ 0b10000000,
-						_uid: (i << 8) + j,
+						_uid: (1 << 16) + (i << 8) + j,
 					});
 				}
 			}
@@ -105,7 +105,7 @@ var appVm = new Vue({
 						x: 20 + 6 * j,
 						y: 22 + i * 40,
 						index: i ^ 0b10000000,
-						_uid: (i << 8) + j,
+						_uid: (2 << 16) + (i << 8) + j,
 					});
 				}
 			}
