@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<title>将棋</title>
+<style>
+
+#board {
+-webkit-user-select: none;
+-moz-user-select: none;
+user-select: none;
+font-family: "ヒラギノ明朝 ProN W6", "HiraMinProN-W6", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", "MS 明朝", serif;
+}
+
+.piece {
+cursor: pointer;
+font-weight: bold;
+}
+
+[v-cloak] { display: none }
+
+</style>
+</head>
+<body id="app">
+<svg id="board" v-cloak width="572" height="372">
+  <defs>
+		<path id="pieceShape" stroke-width="2"
+					stroke-linejoin="round"
+					d="M-16 18 L-12 -10 0 -18 12 -10 16 18 Z" />
+  </defs>
+
+	<rect fill="#B08854" x="100" y="0" width="372" height="372" />
+	<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
+				x="1" y="1" width="80" height="282" />
+	<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
+				x="491" y="89" width="80" height="282" />
+
+	<g>
+		<template v-repeat="y in [0,1,2,3,4,5,6,7,8]">
+			<template v-repeat="x in [0,1,2,3,4,5,6,7,8]">
+				<rect	width="40" height="40"
+							v-attr="x: 100 + 2 + x * 41,
+											y: 2 + y * 41,
+											fill: 11 + x + y * 10 === lastMoveIndex ?
+											'#D0FF6D' : '#E8B36D'"
+							v-on="click: selectSquare($event, x, y)" />
+			</template>
+		</template>
+	</g>
+
+	<circle fill="#B08854" r="3"
+					v-attr="cx: 100 + 1.5 + 3 * 41, cy: 1.5 + 3 * 41" />
+	<circle fill="#B08854" r="3"
+					v-attr="cx: 100 + 1.5 + 6 * 41, cy: 1.5 + 3 * 41" />
+	<circle fill="#B08854" r="3"
+					v-attr="cx: 100 + 1.5 + 3 * 41, cy: 1.5 + 6 * 41" />
+	<circle fill="#B08854" r="3"
+					v-attr="cx: 100 + 1.5 + 6 * 41, cy: 1.5 + 6 * 41" />
+
+	<g v-repeat="pieces">
+		<piece $data="{{$data}}" on-click="{{selectPiece}}"></piece>
+	</g>
+
+	<g id="promotionSelector"
+		 v-show="promotionSelect.show"
+		 v-attr="transform: 'translate(' + promotionSelect.x + ', ' + promotionSelect.y + ')'">
+		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
+					x="-57" y="0" width="114" height="62"
+					/>
+		<piece $data="{{unpromotedPiece}}"
+					 on-click="{{selectUnpromote}}"></piece>
+		<piece $data="{{promotedPiece}}"
+					 on-click="{{selectPromote}}"></piece>
+	</g>
+</svg>
+<br>
+<button v-on="click: init">init</button>
+<button v-on="click: undo">undo</button>
+<button v-on="click: command('allMoves')">moves</button>
+<button v-on="click: command('ai')">ai</button>
+
+<script src="vue.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
