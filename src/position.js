@@ -1,9 +1,9 @@
-"use strict"
+"use strict";
 
 export default class Position {
 
 	static get MAX_MOVES_NUM_IN_A_POSITION() {
-		return 593; // 593
+		return 593;
 	}
 
 	constructor() {

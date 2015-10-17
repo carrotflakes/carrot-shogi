@@ -125,33 +125,25 @@ var appVm = new Vue({
 				this.selectedPiece = null;
 				return;
 			}
-	//		if (fromIdx & 0b10000000) {
-				//let to = 2 + (fromIdx ^ 0b10000000) + position.player;
-				//position.move({ fromIdx, toIdx, to });
-				//this.draw();
-				//this.selectedPiece = null;
-//			} else {
-				switch (position.canMove(fromIdx, toIdx)) {
-				case 1:
-					this.move_(fromIdx, toIdx, false);
-					break;
-				case 2:
-					this.move_(fromIdx, toIdx, true);
-					break;
-				case 3:
-					this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111];
-					this.unpromotedPiece.black = !!(position.player & 0b0100000),
-					this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111 | 0b10000];
-					this.promotedPiece.black = !!(position.player & 0b0100000),
-					this.promotionSelect.show = true;
-					this.promotionSelect.fromIdx = fromIdx;
-					this.promotionSelect.toIdx = toIdx;
-					this.promotionSelect.x = 102 + 41 * ((toIdx - 11) % 10) + 20;
-					this.promotionSelect.y = 2 + 41 * ((toIdx - 11) / 10 | 0);
-					break;
-				}
-//			}
-
+			switch (position.canMove(fromIdx, toIdx)) {
+			case 1:
+				this.move_(fromIdx, toIdx, false);
+				break;
+			case 2:
+				this.move_(fromIdx, toIdx, true);
+				break;
+			case 3:
+				this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111];
+				this.unpromotedPiece.black = !!(position.player & 0b0100000),
+				this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111 | 0b10000];
+				this.promotedPiece.black = !!(position.player & 0b0100000),
+				this.promotionSelect.show = true;
+				this.promotionSelect.fromIdx = fromIdx;
+				this.promotionSelect.toIdx = toIdx;
+				this.promotionSelect.x = 102 + 41 * ((toIdx - 11) % 10) + 20;
+				this.promotionSelect.y = 2 + 41 * ((toIdx - 11) / 10 | 0);
+				break;
+			}
 		},
 		move_(fromIdx, toIdx, promote) {
 			if (fromIdx & 0b10000000) {
