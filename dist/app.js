@@ -84,31 +84,9 @@
 	};
 
 	_vue2["default"].filter('position', function (piece) {
-		var x,
-		    y,
+		var x = piece.x,
+		    y = piece.y,
 		    angle = piece.black ? 0 : 180;
-
-		if (piece.index === 0) {
-			x = -31;
-			y = 31;
-		} else if (piece.index === 1) {
-			x = 31;
-			y = 31;
-		} else if (piece.index & 128) {
-			var pi = piece.index ^ 128;
-			if (piece.black) {
-				x = 512;
-				y = 372 - 22 - pi * 40;
-			} else {
-				x = 20;
-				y = 22 + pi * 40;
-			}
-		} else {
-			var ix = (piece.index - 11) % 10,
-			    iy = (piece.index - 11) / 10 | 0;
-			x = 100 + 2 + 41 * ix + 20;
-			y = 2 + 41 * iy + 20;
-		}
 
 		return "translate(" + x + ", " + y + ") rotate(" + angle + ")";
 	});
@@ -121,12 +99,14 @@
 			lastMoveIndex: 0,
 			unpromotedPiece: {
 				label: "歩兵",
-				index: 0,
+				x: -31,
+				y: 31,
 				black: true
 			},
 			promotedPiece: {
 				label: "と金",
-				index: 1,
+				x: 31,
+				y: 31,
 				black: true
 			},
 			promotionSelect: {
@@ -149,35 +129,47 @@
 				this.draw();
 			},
 			draw: function draw() {
-				this.pieces.splice(0);
+				var newPieces = [];
 				for (var i = 0; i < position.board.length; ++i) {
-					var label = LABEL_TABLE[position.board[i] & 31];
+					var sq = position.board[i],
+					    label = LABEL_TABLE[sq & 31];
 					if (label) {
-						this.pieces.push({
+						newPieces.push({
 							label: label,
-							black: !!(position.board[i] & 32),
-							index: i
+							black: !!(sq & 32),
+							x: 100 + 2 + 41 * ((i - 11) % 10) + 20,
+							y: 2 + 41 * ((i - 11) / 10 | 0) + 20,
+							index: i,
+							_uid: (i << 8) + sq
 						});
 					}
 				}
 				for (var i = 0; i < position.bPieces.length; ++i) {
 					for (var j = 0; j < position.bPieces[i]; ++j) {
-						this.pieces.push({
+						newPieces.push({
 							label: LABEL_TABLE[i + 2],
 							black: true,
-							index: i ^ 128
+							x: 512 + 6 * j,
+							y: 372 - 22 - i * 40,
+							index: i ^ 128,
+							_uid: (i << 8) + j
 						});
 					}
 				}
 				for (var i = 0; i < position.wPieces.length; ++i) {
 					for (var j = 0; j < position.wPieces[i]; ++j) {
-						this.pieces.push({
+						newPieces.push({
 							label: LABEL_TABLE[i + 2],
 							black: false,
-							index: i ^ 128
+							x: 20 + 6 * j,
+							y: 22 + i * 40,
+							index: i ^ 128,
+							_uid: (i << 8) + j
 						});
 					}
 				}
+				this.pieces.splice.apply(this.pieces, [0, this.pieces.length].concat(newPieces));
+
 				var hl = position.history.length;
 				this.lastMoveIndex = hl > 0 ? position.history[hl - 1].toIdx : 0;
 			},
@@ -186,12 +178,6 @@
 					this.selectedPiece = null;
 					return;
 				}
-				//		if (fromIdx & 0b10000000) {
-				//let to = 2 + (fromIdx ^ 0b10000000) + position.player;
-				//position.move({ fromIdx, toIdx, to });
-				//this.draw();
-				//this.selectedPiece = null;
-				//			} else {
 				switch (position.canMove(fromIdx, toIdx)) {
 					case 1:
 						this.move_(fromIdx, toIdx, false);
@@ -209,7 +195,6 @@
 						this.promotionSelect.y = 2 + 41 * ((toIdx - 11) / 10 | 0);
 						break;
 				}
-				//			}
 			},
 			move_: function move_(fromIdx, toIdx, promote) {
 				if (fromIdx & 128) {
@@ -297,7 +282,7 @@
 		_createClass(Position, null, [{
 			key: "MAX_MOVES_NUM_IN_A_POSITION",
 			get: function get() {
-				return 593; // 593
+				return 593;
 			}
 		}]);
 
@@ -1011,7 +996,7 @@
 	if (false) {
 	(function () {
 	var Vue = require("vue")
-	var hotAPI = require("/home/yuki/program/shogijs/node_modules/vue-loader/lib/hot-reload-api.js")
+	var hotAPI = require("/home/yuki/program/carrot-shogi/node_modules/vue-loader/lib/hot-reload-api.js")
 	hotAPI.install(Vue)
 	if (!hotAPI.compatible) return
 	var map = Vue.config._hotComponents

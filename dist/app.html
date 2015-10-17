@@ -41,7 +41,7 @@ font-weight: bold;
 							v-attr="x: 100 + 2 + x * 41,
 											y: 2 + y * 41,
 											fill: 11 + x + y * 10 === lastMoveIndex ?
-											'#D0FF6D' : '#E8B36D'"
+											'#FFF97B' : '#E8B36D'"
 							v-on="click: selectSquare($event, x, y)" />
 			</template>
 		</template>
@@ -56,7 +56,7 @@ font-weight: bold;
 	<circle fill="#B08854" r="3"
 					v-attr="cx: 100 + 1.5 + 6 * 41, cy: 1.5 + 6 * 41" />
 
-	<g v-repeat="pieces">
+	<g v-repeat="pieces" track-by="_uid">
 		<piece $data="{{$data}}" on-click="{{selectPiece}}"></piece>
 	</g>
 
