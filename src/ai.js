@@ -80,7 +80,7 @@ function search(position, depth, alpha, beta, mi) {
 }
 
 
-export default function ai(position) {
+export default function ai(position, depth) {
 	var mi = position.allMoves(moveArray, 0);
 	//sortMoves(position, moves);
 
@@ -88,7 +88,7 @@ export default function ai(position) {
 	alpha = -4096;
 	for (let i = 0; i < mi; i += 5) {
 		position.move_(moveArray, i);
-		let score = -search(position, 3, -4096, -alpha, mi);
+		let score = -search(position, depth-1, -4096, -alpha, mi);
 		position.unmove_(moveArray, i);
 		if (alpha < score) {
 			bestMove = i;

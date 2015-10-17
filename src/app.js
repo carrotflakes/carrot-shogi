@@ -4,8 +4,6 @@ import ai from "./ai.js";
 import pieceComponent from "./components/piece.vue";
 
 
-var position = new Position();
-
 const LABEL_TABLE = {
 	0b00001: "王将",
 	0b00010: "飛車",
@@ -22,6 +20,9 @@ const LABEL_TABLE = {
 	0b10111: "成香",
 	0b11000: "と金",
 };
+
+var position = new Position();
+var searchDepth = 4;
 
 
 Vue.filter('position', function (piece) {
@@ -192,7 +193,7 @@ var appVm = new Vue({
 			if (cmd === "allMoves")
 				console.dir(position.allMoves());
 			if (cmd === "ai") {
-				var move = ai(position);
+				var move = ai(position, searchDepth);
 				position.move(move);
 				this.promotionSelect.show = false;
 				this.draw();
@@ -204,4 +205,23 @@ var appVm = new Vue({
 	},
 });
 
+
+searchDepth = +getUrlParameter("sd", searchDepth);
 appVm.init();
+
+
+function getUrlParameter(key, def) {
+	var str = location.search.split("?");
+	if (str.length < 2) {
+		return def || "";
+	}
+
+	var params = str[1].split("&");
+	for (var i = 0; i < params.length; i++) {
+		var keyVal = params[i].split("=");
+		if (keyVal[0] === key && keyVal.length === 2) {
+			return decodeURIComponent(keyVal[1]);
+		}
+	}
+	return def !== undefined ? def : "";
+};

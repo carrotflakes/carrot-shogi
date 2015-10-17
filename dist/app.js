@@ -64,8 +64,6 @@
 
 	var _componentsPieceVue2 = _interopRequireDefault(_componentsPieceVue);
 
-	var position = new _positionJs2["default"]();
-
 	var LABEL_TABLE = {
 		1: "王将",
 		2: "飛車",
@@ -82,6 +80,9 @@
 		23: "成香",
 		24: "と金"
 	};
+
+	var position = new _positionJs2["default"]();
+	var searchDepth = 4;
 
 	_vue2["default"].filter('position', function (piece) {
 		var x = piece.x,
@@ -245,8 +246,7 @@
 			command: function command(cmd) {
 				if (cmd === "allMoves") console.dir(position.allMoves());
 				if (cmd === "ai") {
-					var move = (0, _aiJs2["default"])(position);
-					console.dir(move);
+					var move = (0, _aiJs2["default"])(position, searchDepth);
 					position.move(move);
 					this.promotionSelect.show = false;
 					this.draw();
@@ -258,7 +258,24 @@
 		}
 	});
 
+	searchDepth = +getUrlParameter("sd", searchDepth);
 	appVm.init();
+
+	function getUrlParameter(key, def) {
+		var str = location.search.split("?");
+		if (str.length < 2) {
+			return def || "";
+		}
+
+		var params = str[1].split("&");
+		for (var i = 0; i < params.length; i++) {
+			var keyVal = params[i].split("=");
+			if (keyVal[0] === key && keyVal.length === 2) {
+				return decodeURIComponent(keyVal[1]);
+			}
+		}
+		return def !== undefined ? def : "";
+	};
 
 /***/ },
 /* 1 */,
@@ -963,7 +980,7 @@
 		return alpha;
 	}
 
-	function ai(position) {
+	function ai(position, depth) {
 		var mi = position.allMoves(moveArray, 0);
 		//sortMoves(position, moves);
 
@@ -971,7 +988,7 @@
 		    alpha = -4096;
 		for (var i = 0; i < mi; i += 5) {
 			position.move_(moveArray, i);
-			var score = -search(position, 3, -4096, -alpha, mi);
+			var score = -search(position, depth - 1, -4096, -alpha, mi);
 			position.unmove_(moveArray, i);
 			if (alpha < score) {
 				bestMove = i;
