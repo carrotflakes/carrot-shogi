@@ -62,11 +62,13 @@ var appVm = new Vue({
 		init() {
 			this.selectedPiece = null;
 			position = new Position();
+			this.promotionSelect.show = false;
 			this.draw();
 		},
 		undo() {
 			this.selectedPiece = null;
 			position.unmove();
+			this.promotionSelect.show = false;
 			this.draw();
 		},
 		draw() {
@@ -191,8 +193,8 @@ var appVm = new Vue({
 				console.dir(position.allMoves());
 			if (cmd === "ai") {
 				var move = ai(position);
-				console.dir(move);
 				position.move(move);
+				this.promotionSelect.show = false;
 				this.draw();
 			}
 		},

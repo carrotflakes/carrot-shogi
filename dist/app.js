@@ -121,11 +121,13 @@
 			init: function init() {
 				this.selectedPiece = null;
 				position = new _positionJs2["default"]();
+				this.promotionSelect.show = false;
 				this.draw();
 			},
 			undo: function undo() {
 				this.selectedPiece = null;
 				position.unmove();
+				this.promotionSelect.show = false;
 				this.draw();
 			},
 			draw: function draw() {
@@ -246,6 +248,7 @@
 					var move = (0, _aiJs2["default"])(position);
 					console.dir(move);
 					position.move(move);
+					this.promotionSelect.show = false;
 					this.draw();
 				}
 			}
