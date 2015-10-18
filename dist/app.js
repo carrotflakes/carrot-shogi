@@ -65,7 +65,7 @@
 	var _componentsPieceVue2 = _interopRequireDefault(_componentsPieceVue);
 
 	var LABEL_TABLE = {
-		1: "王将",
+		1: "玉将",
 		2: "飛車",
 		3: "角行",
 		4: "金将",

@@ -5,7 +5,7 @@ import pieceComponent from "./components/piece.vue";
 
 
 const LABEL_TABLE = {
-	0b00001: "王将",
+	0b00001: "玉将",
 	0b00010: "飛車",
 	0b00011: "角行",
 	0b00100: "金将",
