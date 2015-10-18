@@ -39,6 +39,7 @@ var appVm = new Vue({
 		pieces: [],
 		selectedPiece: null,
 		lastMoveIndex: 0,
+		gameMode: null,
 		unpromotedPiece: {
 			label: "歩兵",
 			x: -31,
@@ -61,12 +62,12 @@ var appVm = new Vue({
 	},
 	methods: {
 		init() {
-			this.selectedPiece = null;
-			position = new Position();
-			this.promotionSelect.show = false;
-			this.draw();
+			this.gameMode = null;
 		},
 		undo() {
+			if (position.history.length === 0)
+				return;
+
 			this.selectedPiece = null;
 			position.unmove();
 			this.promotionSelect.show = false;
@@ -164,8 +165,38 @@ var appVm = new Vue({
 
 			this.draw();
 			this.selectedPiece = null;
+
+			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b1000000)
+				window.setTimeout(() => this.moveByAI(), 10);
+		},
+		moveByAI() {
+			if (this.gameMode === null)
+				return;
+
+			var move = ai(position, searchDepth);
+			position.move(move);
+			this.promotionSelect.show = false;
+			this.draw();
+		},
+		gameStart(mode) {
+			if (["sente", "gote", "free"].indexOf(mode) === -1)
+				return;
+
+			this.gameMode = mode;
+			this.selectedPiece = null;
+			position = new Position();
+			this.promotionSelect.show = false;
+			this.draw();
+
+			if (this.gameMode === "gote") {
+				position.player ^= 0b1100000;
+				window.setTimeout(() => this.moveByAI(), 10);
+			}
 		},
 		selectPiece(event, piece) {
+			if (this.gameMode === null)
+				return;
+
 			if (this.selectedPiece === piece) {
 				this.selectedPiece = null;
 			} else if (this.selectedPiece &&
@@ -177,6 +208,9 @@ var appVm = new Vue({
 			}
 		},
 		selectSquare(event, x, y) {
+			if (this.gameMode === null)
+				return;
+
 			if (this.selectedPiece !== null)
 				this.move(this.selectedPiece.index, 11 + 10 * y + x);
 		},
@@ -187,17 +221,6 @@ var appVm = new Vue({
 		selectUnpromote() {
 			this.move_(this.promotionSelect.fromIdx, this.promotionSelect.toIdx, false);
 			this.promotionSelect.show = false;
-		},
-
-		command(cmd) {
-			if (cmd === "allMoves")
-				console.dir(position.allMoves());
-			if (cmd === "ai") {
-				var move = ai(position, searchDepth);
-				position.move(move);
-				this.promotionSelect.show = false;
-				this.draw();
-			}
 		},
 	},
 	components: {

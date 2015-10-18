@@ -98,6 +98,7 @@
 			pieces: [],
 			selectedPiece: null,
 			lastMoveIndex: 0,
+			gameMode: null,
 			unpromotedPiece: {
 				label: "歩兵",
 				x: -31,
@@ -120,12 +121,11 @@
 		},
 		methods: {
 			init: function init() {
-				this.selectedPiece = null;
-				position = new _positionJs2["default"]();
-				this.promotionSelect.show = false;
-				this.draw();
+				this.gameMode = null;
 			},
 			undo: function undo() {
+				if (position.history.length === 0) return;
+
 				this.selectedPiece = null;
 				position.unmove();
 				this.promotionSelect.show = false;
@@ -200,6 +200,8 @@
 				}
 			},
 			move_: function move_(fromIdx, toIdx, promote) {
+				var _this = this;
+
 				if (fromIdx & 128) {
 					position.move({
 						fromIdx: fromIdx,
@@ -221,8 +223,40 @@
 
 				this.draw();
 				this.selectedPiece = null;
+
+				if (this.gameMode === "sente" && position.player === 64 || this.gameMode === "gote" && position.player === 64) window.setTimeout(function () {
+					return _this.moveByAI();
+				}, 10);
+			},
+			moveByAI: function moveByAI() {
+				if (this.gameMode === null) return;
+
+				var move = (0, _aiJs2["default"])(position, searchDepth);
+				position.move(move);
+				this.promotionSelect.show = false;
+				this.draw();
+			},
+			gameStart: function gameStart(mode) {
+				var _this2 = this;
+
+				if (["sente", "gote", "free"].indexOf(mode) === -1) return;
+
+				this.gameMode = mode;
+				this.selectedPiece = null;
+				position = new _positionJs2["default"]();
+				this.promotionSelect.show = false;
+				this.draw();
+
+				if (this.gameMode === "gote") {
+					position.player ^= 96;
+					window.setTimeout(function () {
+						return _this2.moveByAI();
+					}, 10);
+				}
 			},
 			selectPiece: function selectPiece(event, piece) {
+				if (this.gameMode === null) return;
+
 				if (this.selectedPiece === piece) {
 					this.selectedPiece = null;
 				} else if (this.selectedPiece && !(this.selectedPiece.index & 128) && !(piece.index & 128)) {
@@ -232,6 +266,8 @@
 				}
 			},
 			selectSquare: function selectSquare(event, x, y) {
+				if (this.gameMode === null) return;
+
 				if (this.selectedPiece !== null) this.move(this.selectedPiece.index, 11 + 10 * y + x);
 			},
 			selectPromote: function selectPromote() {
@@ -241,16 +277,6 @@
 			selectUnpromote: function selectUnpromote() {
 				this.move_(this.promotionSelect.fromIdx, this.promotionSelect.toIdx, false);
 				this.promotionSelect.show = false;
-			},
-
-			command: function command(cmd) {
-				if (cmd === "allMoves") console.dir(position.allMoves());
-				if (cmd === "ai") {
-					var move = (0, _aiJs2["default"])(position, searchDepth);
-					position.move(move);
-					this.promotionSelect.show = false;
-					this.draw();
-				}
 			}
 		},
 		components: {

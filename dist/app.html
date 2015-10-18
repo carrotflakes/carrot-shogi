@@ -5,11 +5,20 @@
 <title>将棋</title>
 <style>
 
+html, body {
+width: 100%;
+}
+
 #game {
 -webkit-user-select: none;
 -moz-user-select: none;
 user-select: none;
 font-family: "ヒラギノ明朝 ProN W6", "HiraMinProN-W6", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", "MS 明朝", serif;
+
+position: absolute;
+left: 50%;
+width: 572px;
+margin-left: -286px;
 }
 
 .svg-button {
@@ -65,34 +74,60 @@ font-weight: bold;
 		<piece $data="{{$data}}" on-click="{{selectPiece}}"></piece>
 	</g>
 
-	<g class="svg-button" v-on="click: init">
+	<g class="svg-button"
+		 transform="translate(0, 286)"
+		 v-on="click: init">
 		<rect fill="#A7D8A5"
-					x="0" y="286" width="98" height="28" />
-		<text fill="#046142" x="6" y="306" font-size="15">指し直す</text>
+					x="0" y="0" width="98" height="28" />
+		<text fill="#046142" x="6" y="20" font-size="15">指し直す</text>
 	</g>
 
-	<g class="svg-button" v-on="click: undo">
+	<g class="svg-button"
+		 transform="translate(0, 315)"
+		 v-on="click: undo">
 		<rect fill="#A7D8A5"
-					x="0" y="315" width="98" height="28" />
-		<text fill="#046142" x="6" y="335" font-size="15">一手戻す</text>
+					x="0" y="0" width="98" height="28" />
+		<text fill="#046142" x="6" y="20" font-size="15">一手戻す</text>
 	</g>
 
-	<g class="svg-button" v-on="click: command('ai')">
+	<g class="svg-button"
+		 transform="translate(0, 344)"
+		 v-on="click: moveByAI()">
 		<rect fill="#A7D8A5"
-					x="0" y="344" width="98" height="28" />
-		<text fill="#046142" x="6" y="364" font-size="15">AIが指す</text>
+					x="0" y="0" width="98" height="28" />
+		<text fill="#046142" x="6" y="20" font-size="15">AIが指す</text>
 	</g>
 
 	<g id="promotionSelector"
 		 v-show="promotionSelect.show"
 		 v-attr="transform: 'translate(' + promotionSelect.x + ', ' + promotionSelect.y + ')'">
 		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
-					x="-57" y="0" width="114" height="62"
-					/>
+					x="-57" y="0" width="114" height="62" />
 		<piece $data="{{unpromotedPiece}}"
 					 on-click="{{selectUnpromote}}"></piece>
 		<piece $data="{{promotedPiece}}"
 					 on-click="{{selectPromote}}"></piece>
+	</g>
+
+	<g transform="translate(200, 100)"
+		 v-show="gameMode === null">
+		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
+					x="0" y="0" width="200" height="200" />
+
+		<g class="svg-button"
+			 transform="translate(20, 50)"
+			 v-on="click: gameStart('sente')">
+			<rect fill="#F56F49"
+						x="0" y="0" width="150" height="38" />
+			<text fill="#482015" x="6" y="28" font-size="24">先手で対局</text>
+		</g>
+		<g class="svg-button"
+			 transform="translate(20, 100)"
+			 v-on="click: gameStart('gote')">
+			<rect fill="#F56F49"
+						x="0" y="0" width="150" height="38" />
+			<text fill="#482015" x="6" y="28" font-size="24">後手で対局</text>
+		</g>
 	</g>
 </svg>
 <br>
