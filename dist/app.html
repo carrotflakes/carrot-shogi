@@ -84,13 +84,14 @@ font-weight: bold;
 
 	<g class="svg-button"
 		 transform="translate(0, 315)"
-		 v-on="click: undo">
+		 v-on="click: matta">
 		<rect fill="#A7D8A5"
 					x="0" y="0" width="98" height="28" />
-		<text fill="#046142" x="6" y="20" font-size="15">一手戻す</text>
+		<text fill="#046142" x="6" y="20" font-size="15">待った</text>
 	</g>
 
 	<g class="svg-button"
+		 style="display: none;"
 		 transform="translate(0, 344)"
 		 v-on="click: moveByAI()">
 		<rect fill="#A7D8A5"
@@ -109,24 +110,26 @@ font-weight: bold;
 					 on-click="{{selectPromote}}"></piece>
 	</g>
 
-	<g transform="translate(200, 100)"
+	<g transform="translate(286, 80)"
 		 v-show="gameMode === null">
 		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
-					x="0" y="0" width="200" height="200" />
+					x="-120" y="0" width="240" height="200" />
 
+		<text fill="#555"
+					x="-75" y="50" font-size="24">対局開始</text>
 		<g class="svg-button"
-			 transform="translate(20, 50)"
+			 transform="translate(-75, 80)"
 			 v-on="click: gameStart('sente')">
 			<rect fill="#F56F49"
 						x="0" y="0" width="150" height="38" />
-			<text fill="#482015" x="6" y="28" font-size="24">先手で対局</text>
+			<text fill="#000" x="6" y="28" font-size="24">先手で対局</text>
 		</g>
 		<g class="svg-button"
-			 transform="translate(20, 100)"
+			 transform="translate(-75, 130)"
 			 v-on="click: gameStart('gote')">
 			<rect fill="#F56F49"
 						x="0" y="0" width="150" height="38" />
-			<text fill="#482015" x="6" y="28" font-size="24">後手で対局</text>
+			<text fill="#000" x="6" y="28" font-size="24">後手で対局</text>
 		</g>
 	</g>
 </svg>

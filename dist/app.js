@@ -123,10 +123,11 @@
 			init: function init() {
 				this.gameMode = null;
 			},
-			undo: function undo() {
-				if (position.history.length === 0) return;
+			matta: function matta() {
+				if (position.history.length < 2) return;
 
 				this.selectedPiece = null;
+				position.unmove();
 				position.unmove();
 				this.promotionSelect.show = false;
 				this.draw();
@@ -224,7 +225,7 @@
 				this.draw();
 				this.selectedPiece = null;
 
-				if (this.gameMode === "sente" && position.player === 64 || this.gameMode === "gote" && position.player === 64) window.setTimeout(function () {
+				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 64) window.setTimeout(function () {
 					return _this.moveByAI();
 				}, 10);
 			},
@@ -1411,7 +1412,7 @@
 /* 11 */
 /***/ function(module, exports) {
 
-	module.exports = "<g class=\"piece\"\n\t\t v-attr=\"transform: $data | position\"\n\t\t v-on=\"click: onClick($event, $data)\">\n\t\t <use xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"#pieceShape\"\n\t\t\t \t\tfill=\"{{$data === selectedPiece ? '#FFEACF' : '#F0C895'}}\"\n\t\t\t\t\tstroke=\"#5C4425\" />\n\t\t <text x=\"-7\" y=\"0\"  fill=\"#5C4425\" font-size=\"14px\">{{label[0]}}</text>\n\t\t <text x=\"-7\" y=\"14\" fill=\"#5C4425\" font-size=\"14px\">{{label[1]}}</text>\n\t</g>";
+	module.exports = "<g class=\"piece\"\n\t\t v-attr=\"transform: $data | position\"\n\t\t v-on=\"click: onClick($event, $data)\">\n\t\t <use xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"#pieceShape\"\n\t\t\t \t\tfill=\"{{$data === selectedPiece ? '#FFEACF' : '#F0C895'}}\"\n\t\t\t\t\tstroke=\"#4A361B\" />\n\t\t <text x=\"-7\" y=\"0\"  fill=\"#4A361B\" font-size=\"14px\">{{label[0]}}</text>\n\t\t <text x=\"-7\" y=\"14\" fill=\"#4A361B\" font-size=\"14px\">{{label[1]}}</text>\n\t</g>";
 
 /***/ }
 /******/ ]);

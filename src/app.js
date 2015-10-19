@@ -64,11 +64,12 @@ var appVm = new Vue({
 		init() {
 			this.gameMode = null;
 		},
-		undo() {
-			if (position.history.length === 0)
+		matta() {
+			if (position.history.length < 2)
 				return;
 
 			this.selectedPiece = null;
+			position.unmove();
 			position.unmove();
 			this.promotionSelect.show = false;
 			this.draw();
