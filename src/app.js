@@ -64,9 +64,10 @@ var appVm = new Vue({
 	methods: {
 		init() {
 			this.gameMode = null;
+			this.gameResult = null;
 		},
 		matta() {
-			if (position.history.length < 2)
+			if (this.gameMove === null || this.gameResult !== null || position.history.length < 2)
 				return;
 
 			this.selectedPiece = null;
@@ -221,6 +222,7 @@ var appVm = new Vue({
 			this.selectedPiece = null;
 			position = new Position();
 			this.promotionSelect.show = false;
+			this.gameResult = null;
 			this.draw();
 
 			if (this.gameMode === "gote") {

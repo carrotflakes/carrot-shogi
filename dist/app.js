@@ -123,9 +123,10 @@
 		methods: {
 			init: function init() {
 				this.gameMode = null;
+				this.gameResult = null;
 			},
 			matta: function matta() {
-				if (position.history.length < 2) return;
+				if (this.gameMove === null || this.gameResult !== null || position.history.length < 2) return;
 
 				this.selectedPiece = null;
 				position.unmove();
@@ -280,6 +281,7 @@
 				this.selectedPiece = null;
 				position = new _positionJs2["default"]();
 				this.promotionSelect.show = false;
+				this.gameResult = null;
 				this.draw();
 
 				if (this.gameMode === "gote") {

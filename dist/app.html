@@ -113,7 +113,7 @@ font-weight: bold;
 
 	<g transform="translate(286, 80)"
 		 v-show="gameMode === null">
-		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
+		<rect fill="rgba(247,247,247,0.8)" stroke="#F7F7F7" stroke-width="2"
 					x="-120" y="0" width="240" height="200" />
 
 		<text fill="#555"
@@ -136,11 +136,13 @@ font-weight: bold;
 
 	<g transform="translate(286, 80)"
 		 v-show="gameResult !== null">
-		<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
+		<rect fill="rgba(247,247,247,0.8)" stroke="#F7F7F7" stroke-width="2"
 					x="-120" y="0" width="240" height="200" />
 
 		<text fill="#555"
-					x="-75" y="50" font-size="24">{{gameResult}}</text>
+					x="-75" y="50" font-size="24">終局</text>
+		<text fill="#111"
+					x="-75" y="110" font-size="20">{{gameResult}}</text>
 	</g>
 </svg>
 <br>
