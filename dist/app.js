@@ -1036,8 +1036,10 @@
 
 	function sortMoves(position, mi1, mi2) {
 		while (mi1 < mi2) {
-			if (moveArray[mi1 + 4] === 0) {
+			if (moveArray[mi1 + 4] !== 0) {
 				mi1 += 5;
+			} else if (moveArray[mi2 - 1] === 0) {
+				mi2 -= 5;
 			} else {
 				var tmp = undefined;
 				mi2 -= 5;
@@ -1054,7 +1056,7 @@
 		if (depth === 0) return position.player === 16 ? evalPosition(position) : -evalPosition(position);
 
 		var mi2 = position.allMoves(moveArray, mi);
-		//sortMoves(position, mi, mi2);
+		sortMoves(position, mi, mi2);
 
 		for (var i = mi; i < mi2; i += 5) {
 			if ((moveArray[i + 4] & 15) === 8) return 65534;
@@ -1073,7 +1075,7 @@
 
 	function ai(position, depth) {
 		var mi = position.allMoves(moveArray, 0);
-		//sortMoves(position, 0, mi);
+		sortMoves(position, 0, mi);
 
 		var bestMove = -1,
 		    alpha = -65535;
