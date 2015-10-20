@@ -92,6 +92,14 @@ font-weight: bold;
 	</g>
 
 	<g class="svg-button"
+		 transform="translate(0, 344)"
+		 v-on="click: sound = !sound">
+		<rect fill="#A7D8A5"
+					x="0" y="0" width="98" height="28" />
+		<text fill="#046142" x="6" y="20" font-size="15">音: {{sound ? "あり" : "なし"}}</text>
+	</g>
+
+	<g class="svg-button"
 		 style="display: none;"
 		 transform="translate(0, 344)"
 		 v-on="click: moveByAI()">

@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Position from "./position.js";
 import ai from "./ai.js";
+import * as sound from "./sound.js";
 import pieceComponent from "./components/piece.vue";
 
 
@@ -60,6 +61,7 @@ var appVm = new Vue({
 			fromIdx: 0,
 			toIdx: 0,
 		},
+		sound: true,
 	},
 	methods: {
 		init() {
@@ -170,6 +172,7 @@ var appVm = new Vue({
 			this.selectedPiece = null;
 
 			if (position.isIgnoreCheck()) {
+				this.sound && sound.pipu();
 				switch (this.gameMode) {
 				case "sente":
 					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
@@ -182,6 +185,8 @@ var appVm = new Vue({
 					return;
 				}
 			}
+
+			this.sound && sound.pi();
 
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
 				window.setTimeout(() => this.moveByAI(), 10);
@@ -201,6 +206,7 @@ var appVm = new Vue({
 			this.draw();
 
 			if (position.isIgnoreCheck()) {
+				this.sound && sound.pipu();
 				switch (this.gameMode) {
 				case "sente":
 					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
@@ -213,6 +219,7 @@ var appVm = new Vue({
 					return;
 				}
 			}
+			this.sound && sound.pi();
 		},
 		gameStart(mode) {
 			if (["sente", "gote", "free"].indexOf(mode) === -1)
@@ -224,6 +231,7 @@ var appVm = new Vue({
 			this.promotionSelect.show = false;
 			this.gameResult = null;
 			this.draw();
+			this.sound && sound.pirori();
 
 			if (this.gameMode === "gote") {
 				position.player ^= 0b110000;

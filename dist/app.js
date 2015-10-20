@@ -46,6 +46,8 @@
 
 	"use strict";
 
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 	var _vue = __webpack_require__(2);
@@ -60,7 +62,11 @@
 
 	var _aiJs2 = _interopRequireDefault(_aiJs);
 
-	var _componentsPieceVue = __webpack_require__(5);
+	var _soundJs = __webpack_require__(5);
+
+	var sound = _interopRequireWildcard(_soundJs);
+
+	var _componentsPieceVue = __webpack_require__(6);
 
 	var _componentsPieceVue2 = _interopRequireDefault(_componentsPieceVue);
 
@@ -118,7 +124,8 @@
 				y: 0,
 				fromIdx: 0,
 				toIdx: 0
-			}
+			},
+			sound: true
 		},
 		methods: {
 			init: function init() {
@@ -228,6 +235,7 @@
 				this.selectedPiece = null;
 
 				if (position.isIgnoreCheck()) {
+					this.sound && sound.pipu();
 					switch (this.gameMode) {
 						case "sente":
 							this.gameResult = position.player === 16 ? "あなたの勝ちです" : "あなたの負けです";
@@ -240,6 +248,8 @@
 							return;
 					}
 				}
+
+				this.sound && sound.pi();
 
 				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 32) window.setTimeout(function () {
 					return _this.moveByAI();
@@ -259,6 +269,7 @@
 				this.draw();
 
 				if (position.isIgnoreCheck()) {
+					this.sound && sound.pipu();
 					switch (this.gameMode) {
 						case "sente":
 							this.gameResult = position.player === 16 ? "あなたの勝ちです" : "あなたの負けです";
@@ -271,6 +282,7 @@
 							return;
 					}
 				}
+				this.sound && sound.pi();
 			},
 			gameStart: function gameStart(mode) {
 				var _this2 = this;
@@ -283,6 +295,7 @@
 				this.promotionSelect.show = false;
 				this.gameResult = null;
 				this.draw();
+				this.sound && sound.pirori();
 
 				if (this.gameMode === "gote") {
 					position.player ^= 48;
@@ -1093,11 +1106,77 @@
 
 /***/ },
 /* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.pirori = pirori;
+	exports.pi = pi;
+	exports.pipu = pipu;
+
+	var context = null;
+	var AVAILABLE = false;
+
+	exports.AVAILABLE = AVAILABLE;
+	if ("AudioContext" in window) {
+		context = new AudioContext();
+
+		var gain = context.createGain();
+		gain.gain.value = 0.05;
+		gain.connect(context.destination);
+
+		exports.AVAILABLE = AVAILABLE = true;
+	}
+
+	function pirori() {
+		if (context === null) return;
+
+		var time = context.currentTime + 0.05;
+		var osc = context.createOscillator();
+		osc.type = "square";
+		osc.frequency.value = 440;
+		osc.connect(gain);
+		osc.start(time);
+		osc.frequency.setValueAtTime(550, time + 0.1);
+		osc.frequency.setValueAtTime(660, time + 0.2);
+		osc.stop(time + 0.3);
+	}
+
+	function pi() {
+		if (context === null) return;
+
+		var time = context.currentTime + 0.05;
+		var osc = context.createOscillator();
+		osc.type = "square";
+		osc.frequency.value = 440;
+		osc.connect(gain);
+		osc.start(time);
+		osc.stop(time + 0.1);
+	}
+
+	function pipu() {
+		if (context === null) return;
+
+		var time = context.currentTime + 0.05;
+		var osc = context.createOscillator();
+		osc.type = "square";
+		osc.frequency.value = 440;
+		osc.connect(gain);
+		osc.start(time);
+		osc.frequency.setValueAtTime(220, time + 0.1);
+		osc.stop(time + 0.2);
+	}
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(6)
-	module.exports = __webpack_require__(10)
-	module.exports.template = __webpack_require__(11)
+	__webpack_require__(7)
+	module.exports = __webpack_require__(11)
+	module.exports.template = __webpack_require__(12)
 	if (false) {
 	(function () {
 	var Vue = require("vue")
@@ -1117,16 +1196,16 @@
 	}
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(7);
+	var content = __webpack_require__(8);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(9)(content, {});
+	var update = __webpack_require__(10)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1143,10 +1222,10 @@
 	}
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(8)();
+	exports = module.exports = __webpack_require__(9)();
 	// imports
 
 
@@ -1157,7 +1236,7 @@
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	/*
@@ -1213,7 +1292,7 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1438,7 +1517,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1453,7 +1532,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	module.exports = "<g class=\"piece\"\n\t\t v-attr=\"transform: $data | position\"\n\t\t v-on=\"click: onClick($event, $data)\">\n\t\t <use xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"#pieceShape\"\n\t\t\t \t\tfill=\"{{$data === selectedPiece ? '#FFEACF' : '#F0C895'}}\"\n\t\t\t\t\tstroke=\"#4A361B\" />\n\t\t <text x=\"-7\" y=\"0\"  fill=\"#4A361B\" font-size=\"14px\">{{label[0]}}</text>\n\t\t <text x=\"-7\" y=\"14\" fill=\"#4A361B\" font-size=\"14px\">{{label[1]}}</text>\n\t</g>";
