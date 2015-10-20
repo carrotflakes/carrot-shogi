@@ -189,7 +189,7 @@ var appVm = new Vue({
 			this.sound && sound.pi();
 
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
-				window.setTimeout(() => this.moveByAI(), 10);
+				window.setTimeout(() => this.moveByAI(), 100);
 		},
 		moveByAI() {
 			if (this.gameMode === null)
@@ -235,7 +235,7 @@ var appVm = new Vue({
 
 			if (this.gameMode === "gote") {
 				position.player ^= 0b110000;
-				window.setTimeout(() => this.moveByAI(), 10);
+				window.setTimeout(() => this.moveByAI(), 300);
 			}
 		},
 		selectPiece(event, piece) {

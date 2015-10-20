@@ -253,7 +253,7 @@
 
 				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 32) window.setTimeout(function () {
 					return _this.moveByAI();
-				}, 10);
+				}, 100);
 			},
 			moveByAI: function moveByAI() {
 				if (this.gameMode === null) return;
@@ -301,7 +301,7 @@
 					position.player ^= 48;
 					window.setTimeout(function () {
 						return _this2.moveByAI();
-					}, 10);
+					}, 300);
 				}
 			},
 			selectPiece: function selectPiece(event, piece) {
