@@ -99,6 +99,7 @@
 			selectedPiece: null,
 			lastMoveIndex: 0,
 			gameMode: null,
+			gameResult: null,
 			unpromotedPiece: {
 				label: "歩兵",
 				x: -31,
@@ -225,6 +226,20 @@
 				this.draw();
 				this.selectedPiece = null;
 
+				if (position.isIgnoreCheck()) {
+					switch (this.gameMode) {
+						case "sente":
+							this.gameResult = position.player === 32 ? "あなたの勝ちです" : "あなたの負けです";
+							return;
+						case "gote":
+							this.gameResult = position.player === 64 ? "あなたの負けです" : "あなたの勝ちです";
+							return;
+						case "free":
+							this.gameResult = position.player === 32 ? "先手の勝ちです" : "後手の勝ちです";
+							return;
+					}
+				}
+
 				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 64) window.setTimeout(function () {
 					return _this.moveByAI();
 				}, 10);
@@ -233,9 +248,28 @@
 				if (this.gameMode === null) return;
 
 				var move = (0, _aiJs2["default"])(position, searchDepth);
+				if (move === null) {
+					this.gameResult = !(position.player === 32);
+					return;
+				}
 				position.move(move);
+
 				this.promotionSelect.show = false;
 				this.draw();
+
+				if (position.isIgnoreCheck()) {
+					switch (this.gameMode) {
+						case "sente":
+							this.gameResult = position.player === 32 ? "あなたの勝ちです" : "あなたの負けです";
+							return;
+						case "gote":
+							this.gameResult = position.player === 64 ? "あなたの負けです" : "あなたの勝ちです";
+							return;
+						case "free":
+							this.gameResult = position.player === 32 ? "先手の勝ちです" : "後手の勝ちです";
+							return;
+					}
+				}
 			},
 			gameStart: function gameStart(mode) {
 				var _this2 = this;
@@ -747,50 +781,50 @@
 				for (var i = 11; i < 101; ++i) {
 					if (board[i] !== 0) continue;
 					if (pieces[0]) {
-						ma[mi++] = 128;ma[mi++] = i;mi++;ma[mi++] = 2 | player;mi++;
+						ma[mi++] = 128;ma[mi++] = i;mi++;ma[mi++] = 2 | player;ma[mi++] = 0;
 					}
 					if (pieces[1]) {
-						ma[mi++] = 129;ma[mi++] = i;mi++;ma[mi++] = 3 | player;mi++;
+						ma[mi++] = 129;ma[mi++] = i;mi++;ma[mi++] = 3 | player;ma[mi++] = 0;
 					}
 					if (pieces[2]) {
-						ma[mi++] = 130;ma[mi++] = i;mi++;ma[mi++] = 4 | player;mi++;
+						ma[mi++] = 130;ma[mi++] = i;mi++;ma[mi++] = 4 | player;ma[mi++] = 0;
 					}
 					if (pieces[3]) {
-						ma[mi++] = 131;ma[mi++] = i;mi++;ma[mi++] = 5 | player;mi++;
+						ma[mi++] = 131;ma[mi++] = i;mi++;ma[mi++] = 5 | player;ma[mi++] = 0;
 					}
 				}
 				if (player === 32) {
 					if (pieces[4]) {
 						for (var i = 31; i < 101; ++i) {
 							if (board[i] === 0) {
-								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 32;mi++;
+								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 32;ma[mi++] = 0;
 							}
 						}
 					}
 					for (var i = 21; i < 101; ++i) {
 						if (board[i] !== 0) continue;
 						if (pieces[5]) {
-							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 32;mi++;
+							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 32;ma[mi++] = 0;
 						}
 						if (pieces[6] && !(fuUsed & 1 << i % 10)) {
-							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 32;mi++;
+							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 32;ma[mi++] = 0;
 						}
 					}
 				} else {
 					if (pieces[4]) {
 						for (var i = 11; i < 81; ++i) {
 							if (board[i] === 0) {
-								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 64;mi++;
+								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 64;ma[mi++] = 0;
 							}
 						}
 					}
 					for (var i = 11; i < 91; ++i) {
 						if (board[i] !== 0) continue;
 						if (pieces[5]) {
-							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 64;mi++;
+							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 64;ma[mi++] = 0;
 						}
 						if (pieces[6] && !(fuUsed & 1 << i % 10)) {
-							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 64;mi++;
+							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 64;ma[mi++] = 0;
 						}
 					}
 				}
@@ -896,12 +930,20 @@
 				}
 			}
 		}, {
+			key: "isIgnoreCheck",
+			value: function isIgnoreCheck() {
+				var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
+				    mi = this.allMoves(moveArray, 0);
+				for (var i = 0; i < mi; i += 5) if ((moveArray[i + 4] & 31) === 1) return true;;
+				return false;
+			}
+		}, {
 			key: "canMove",
 			value: function canMove(fromIdx, toIdx) {
 				var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
 				    mi = this.allMoves(moveArray, 0),
 				    result = 0;
-				for (var i = 0; i < mi; i += 5) if (moveArray[i] == fromIdx && moveArray[i + 1] == toIdx) result |= moveArray[i + 2] === moveArray[i + 3] ? 1 : 2;
+				for (var i = 0; i < mi; i += 5) if (moveArray[i] === fromIdx && moveArray[i + 1] === toIdx) result |= moveArray[i + 2] === moveArray[i + 3] ? 1 : 2;
 				return result;
 			}
 		}]);
@@ -984,7 +1026,6 @@
 		score -= wPieces[4] * 28;
 		score -= wPieces[5] * 26;
 		score -= wPieces[6] * 15;
-		if (position.player === 64) score = -score;
 		return score;
 	}
 
@@ -1005,14 +1046,18 @@
 	}
 
 	function search(position, depth, alpha, beta, mi) {
-		if (depth === 0) return evalPosition(position);
+		if (depth === 0) return position.player === 32 ? evalPosition(position) : -evalPosition(position);
+
 		var mi2 = position.allMoves(moveArray, mi);
 		//sortMoves(position, mi, mi2);
 
 		for (var i = mi; i < mi2; i += 5) {
+			if ((moveArray[i + 4] & 31) === 1) return 65534;
+
 			position.move_(moveArray, i);
 			var score = -search(position, depth - 1, -beta, -alpha, mi2);
 			position.unmove_(moveArray, i);
+
 			if (alpha < score) {
 				alpha = score;
 				if (beta <= alpha) return alpha;
@@ -1025,23 +1070,30 @@
 		var mi = position.allMoves(moveArray, 0);
 		//sortMoves(position, 0, mi);
 
-		var bestMove = 0,
-		    alpha = -4096;
+		var bestMove = -1,
+		    alpha = -65535;
 		for (var i = 0; i < mi; i += 5) {
+			if ((moveArray[i + 4] & 31) === 1) return "check mated";
+
 			position.move_(moveArray, i);
-			var score = -search(position, depth - 1, -4096, -alpha, mi);
+			var score = -search(position, depth - 1, -65535, -alpha, mi);
 			position.unmove_(moveArray, i);
+
 			if (alpha < score) {
 				bestMove = i;
 				alpha = score;
 			}
 		}
+
+		if (bestMove === -1) return null;
+
 		return {
 			fromIdx: moveArray[bestMove + 0],
 			toIdx: moveArray[bestMove + 1],
 			from: moveArray[bestMove + 2],
 			to: moveArray[bestMove + 3],
-			capture: moveArray[bestMove + 4]
+			capture: moveArray[bestMove + 4],
+			score: alpha
 		};
 	}
 

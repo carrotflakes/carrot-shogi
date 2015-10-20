@@ -40,6 +40,7 @@ var appVm = new Vue({
 		selectedPiece: null,
 		lastMoveIndex: 0,
 		gameMode: null,
+		gameResult: null,
 		unpromotedPiece: {
 			label: "歩兵",
 			x: -31,
@@ -167,6 +168,20 @@ var appVm = new Vue({
 			this.draw();
 			this.selectedPiece = null;
 
+			if (position.isIgnoreCheck()) {
+				switch (this.gameMode) {
+				case "sente":
+					this.gameResult = (position.player === 0b0100000) ? "あなたの勝ちです" : "あなたの負けです";
+					return;
+				case "gote":
+					this.gameResult = (position.player === 0b1000000) ? "あなたの負けです" : "あなたの勝ちです";
+					return;
+				case "free":
+					this.gameResult = (position.player === 0b0100000) ? "先手の勝ちです" : "後手の勝ちです";
+					return;
+				}
+			}
+
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b1000000)
 				window.setTimeout(() => this.moveByAI(), 10);
 		},
@@ -175,9 +190,28 @@ var appVm = new Vue({
 				return;
 
 			var move = ai(position, searchDepth);
+			if (move === null) {
+				this.gameResult = !(position.player === 0b0100000);
+				return;
+			}
 			position.move(move);
+
 			this.promotionSelect.show = false;
 			this.draw();
+
+			if (position.isIgnoreCheck()) {
+				switch (this.gameMode) {
+				case "sente":
+					this.gameResult = (position.player === 0b0100000) ? "あなたの勝ちです" : "あなたの負けです";
+					return;
+				case "gote":
+					this.gameResult = (position.player === 0b1000000) ? "あなたの負けです" :"あなたの勝ちです";
+					return;
+				case "free":
+					this.gameResult = (position.player === 0b0100000) ? "先手の勝ちです" : "後手の勝ちです";
+					return;
+				}
+			}
 		},
 		gameStart(mode) {
 			if (["sente", "gote", "free"].indexOf(mode) === -1)

@@ -350,41 +350,41 @@ export default class Position {
 		for (let i = 11; i < 101; ++i) {
 			if (board[i] !== 0) continue;
 			if (pieces[0])
-			{ ma[mi++] = 0b10000000; ma[mi++] = i; mi++; ma[mi++] = 0b00010 | player; mi++; }
+			{ ma[mi++] = 0b10000000; ma[mi++] = i; mi++; ma[mi++] = 0b00010 | player; ma[mi++] = 0; }
 			if (pieces[1])
-			{ ma[mi++] = 0b10000001; ma[mi++] = i; mi++; ma[mi++] = 0b00011 | player; mi++; }
+			{ ma[mi++] = 0b10000001; ma[mi++] = i; mi++; ma[mi++] = 0b00011 | player; ma[mi++] = 0; }
 			if (pieces[2])
-			{ ma[mi++] = 0b10000010; ma[mi++] = i; mi++; ma[mi++] = 0b00100 | player; mi++; }
+			{ ma[mi++] = 0b10000010; ma[mi++] = i; mi++; ma[mi++] = 0b00100 | player; ma[mi++] = 0; }
 			if (pieces[3])
-			{ ma[mi++] = 0b10000011; ma[mi++] = i; mi++; ma[mi++] = 0b00101 | player; mi++; }
+			{ ma[mi++] = 0b10000011; ma[mi++] = i; mi++; ma[mi++] = 0b00101 | player; ma[mi++] = 0; }
 		}
 		if (player === 0b0100000) {
 			if (pieces[4]) {
 				for (let i = 31; i < 101; ++i) {
 					if (board[i] === 0)
-					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b00110 | 0b0100000; mi++; }
+					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b00110 | 0b0100000; ma[mi++] = 0; }
 				}
 			}
 			for (let i = 21; i < 101; ++i) {
 				if (board[i] !== 0) continue;
 				if (pieces[5])
-				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b00111 | 0b0100000; mi++; }
+				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b00111 | 0b0100000; ma[mi++] = 0; }
 				if (pieces[6] && !(fuUsed & 1 << i % 10))
-				{ ma[mi++] = 0b10000110; ma[mi++] = i; mi++; ma[mi++] = 0b01000 | 0b0100000; mi++; }
+				{ ma[mi++] = 0b10000110; ma[mi++] = i; mi++; ma[mi++] = 0b01000 | 0b0100000; ma[mi++] = 0; }
 			}
 		} else {
 			if (pieces[4]) {
 				for (let i = 11; i < 81; ++i) {
 					if (board[i] === 0)
-					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b00110 | 0b1000000; mi++; }
+					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b00110 | 0b1000000; ma[mi++] = 0; }
 				}
 			}
 			for (let i = 11; i < 91; ++i) {
 				if (board[i] !== 0) continue;
 				if (pieces[5])
-				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b00111 | 0b1000000; mi++; }
+				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b00111 | 0b1000000; ma[mi++] = 0; }
 				if (pieces[6] && !(fuUsed & 1 << i % 10))
-				{ ma[mi++] = 0b10000110; ma[mi++] = i; mi++; ma[mi++] = 0b01000 | 0b1000000; mi++; }
+				{ ma[mi++] = 0b10000110; ma[mi++] = i; mi++; ma[mi++] = 0b01000 | 0b1000000; ma[mi++] = 0; }
 			}
 		}
 
@@ -509,12 +509,21 @@ export default class Position {
 		}
 	}
 
+	isIgnoreCheck() {
+		var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
+		mi = this.allMoves(moveArray, 0);
+		for (var i = 0; i < mi; i += 5)
+			if ((moveArray[i+4] & 0b11111) === 0b00001)
+				return true;;
+		return false;
+	}
+
 	canMove(fromIdx, toIdx) {
 		var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
 		mi = this.allMoves(moveArray, 0),
 		result = 0;
 		for (var i = 0; i < mi; i += 5)
-			if (moveArray[i] == fromIdx && moveArray[i+1] == toIdx)
+			if (moveArray[i] === fromIdx && moveArray[i+1] === toIdx)
 				result |= moveArray[i+2] === moveArray[i+3] ? 1 : 2;
 		return result;
 	}

@@ -50,8 +50,6 @@ function evalPosition(position) {
 	score -= wPieces[4] * 28;
 	score -= wPieces[5] * 26;
 	score -= wPieces[6] * 15;
-	if (position.player === 0b1000000)
-		score = -score;
 	return score;
 }
 
@@ -75,14 +73,19 @@ function sortMoves(position, mi1, mi2) {
 
 function search(position, depth, alpha, beta, mi) {
 	if (depth === 0)
-		return evalPosition(position);
+		return (position.player === 0b0100000) ? evalPosition(position) : -evalPosition(position);
+
 	var mi2 = position.allMoves(moveArray, mi);
 	//sortMoves(position, mi, mi2);
 
 	for (let i = mi; i < mi2; i += 5) {
+		if ((moveArray[i+4] & 0b11111) === 0b00001)
+			return 65534;
+
 		position.move_(moveArray, i);
 		let score = -search(position, depth-1, -beta, -alpha, mi2);
 		position.unmove_(moveArray, i);
+
 		if (alpha < score) {
 			alpha = score;
 			if (beta <= alpha)
@@ -97,22 +100,31 @@ export default function ai(position, depth) {
 	var mi = position.allMoves(moveArray, 0);
 	//sortMoves(position, 0, mi);
 
-	var bestMove = 0,
-	alpha = -4096;
+	var bestMove = -1,
+	alpha = -65535;
 	for (let i = 0; i < mi; i += 5) {
+		if ((moveArray[i+4] & 0b11111) === 0b00001)
+			return "check mated";
+
 		position.move_(moveArray, i);
-		let score = -search(position, depth-1, -4096, -alpha, mi);
+		let score = -search(position, depth-1, -65535, -alpha, mi);
 		position.unmove_(moveArray, i);
+
 		if (alpha < score) {
 			bestMove = i;
 			alpha = score;
 		}
 	}
+
+	if (bestMove === -1)
+		return null;
+
 	return {
 		fromIdx: moveArray[bestMove+0],
 		toIdx:   moveArray[bestMove+1],
 		from:    moveArray[bestMove+2],
 		to:      moveArray[bestMove+3],
 		capture: moveArray[bestMove+4],
+		score: alpha,
 	};
 }
