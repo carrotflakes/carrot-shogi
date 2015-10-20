@@ -3,21 +3,21 @@
 import Position from "./position.js";
 
 
-const PIECE_SCORE_TABLE = new Uint16Array(0b11000 + 1);
-PIECE_SCORE_TABLE[0b00001] = 500;
-PIECE_SCORE_TABLE[0b00010] = 50;
-PIECE_SCORE_TABLE[0b00011] = 45;
-PIECE_SCORE_TABLE[0b00100] = 30;
-PIECE_SCORE_TABLE[0b00101] = 27;
-PIECE_SCORE_TABLE[0b00110] = 18;
-PIECE_SCORE_TABLE[0b00111] = 16;
-PIECE_SCORE_TABLE[0b01000] = 10;
-PIECE_SCORE_TABLE[0b10010] = 70;
-PIECE_SCORE_TABLE[0b10011] = 65;
-PIECE_SCORE_TABLE[0b10101] = 30;
-PIECE_SCORE_TABLE[0b10110] = 30;
-PIECE_SCORE_TABLE[0b10111] = 30;
-PIECE_SCORE_TABLE[0b11000] = 30;
+const PIECE_SCORE_TABLE = new Uint16Array(0b10000);
+PIECE_SCORE_TABLE[0b0001] = 50;
+PIECE_SCORE_TABLE[0b0010] = 45;
+PIECE_SCORE_TABLE[0b0011] = 30;
+PIECE_SCORE_TABLE[0b0100] = 27;
+PIECE_SCORE_TABLE[0b0101] = 18;
+PIECE_SCORE_TABLE[0b0110] = 16;
+PIECE_SCORE_TABLE[0b0111] = 10;
+PIECE_SCORE_TABLE[0b1000] = 500;
+PIECE_SCORE_TABLE[0b1001] = 70;
+PIECE_SCORE_TABLE[0b1010] = 65;
+PIECE_SCORE_TABLE[0b1100] = 30;
+PIECE_SCORE_TABLE[0b1101] = 30;
+PIECE_SCORE_TABLE[0b1110] = 30;
+PIECE_SCORE_TABLE[0b1111] = 30;
 
 const MAX_SEARCH_DEPTH = 5;
 
@@ -31,10 +31,10 @@ function evalPosition(position) {
 	score = 0;
 	for (let i = 11; i < 101; ++i) {
 		let sq = board[i];
-		if (sq & 0b0100000)
-			score += PIECE_SCORE_TABLE[sq & 0b11111];
-		else if (sq & 0b1000000)
-			score -= PIECE_SCORE_TABLE[sq & 0b11111];
+		if (sq & 0b010000)
+			score += PIECE_SCORE_TABLE[sq & 0b1111];
+		else if (sq & 0b100000)
+			score -= PIECE_SCORE_TABLE[sq & 0b1111];
 	}
 	score += bPieces[0] * 60;
 	score += bPieces[1] * 55;
@@ -73,13 +73,13 @@ function sortMoves(position, mi1, mi2) {
 
 function search(position, depth, alpha, beta, mi) {
 	if (depth === 0)
-		return (position.player === 0b0100000) ? evalPosition(position) : -evalPosition(position);
+		return (position.player === 0b010000) ? evalPosition(position) : -evalPosition(position);
 
 	var mi2 = position.allMoves(moveArray, mi);
 	//sortMoves(position, mi, mi2);
 
 	for (let i = mi; i < mi2; i += 5) {
-		if ((moveArray[i+4] & 0b11111) === 0b00001)
+		if ((moveArray[i+4] & 0b1111) === 0b1000)
 			return 65534;
 
 		position.move_(moveArray, i);
@@ -103,7 +103,7 @@ export default function ai(position, depth) {
 	var bestMove = -1,
 	alpha = -65535;
 	for (let i = 0; i < mi; i += 5) {
-		if ((moveArray[i+4] & 0b11111) === 0b00001)
+		if ((moveArray[i+4] & 0b1111) === 0b1000)
 			return "check mated";
 
 		position.move_(moveArray, i);

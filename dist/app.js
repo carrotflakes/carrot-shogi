@@ -65,20 +65,20 @@
 	var _componentsPieceVue2 = _interopRequireDefault(_componentsPieceVue);
 
 	var LABEL_TABLE = {
-		1: "玉将",
-		2: "飛車",
-		3: "角行",
-		4: "金将",
-		5: "銀将",
-		6: "桂馬",
-		7: "香車",
-		8: "歩兵",
-		18: "竜王",
-		19: "竜馬",
-		21: "成銀",
-		22: "成桂",
-		23: "成香",
-		24: "と金"
+		1: "飛車",
+		2: "角行",
+		3: "金将",
+		4: "銀将",
+		5: "桂馬",
+		6: "香車",
+		7: "歩兵",
+		8: "玉将",
+		9: "竜王",
+		10: "竜馬",
+		12: "成銀",
+		13: "成桂",
+		14: "成香",
+		15: "と金"
 	};
 
 	var position = new _positionJs2["default"]();
@@ -137,11 +137,11 @@
 				var newPieces = [];
 				for (var i = 0; i < position.board.length; ++i) {
 					var sq = position.board[i],
-					    label = LABEL_TABLE[sq & 31];
+					    label = LABEL_TABLE[sq & 15];
 					if (label) {
 						newPieces.push({
 							label: label,
-							black: !!(sq & 32),
+							black: !!(sq & 16),
 							x: 100 + 2 + 41 * ((i - 11) % 10) + 20,
 							y: 2 + 41 * ((i - 11) / 10 | 0) + 20,
 							index: i,
@@ -152,7 +152,7 @@
 				for (var i = 0; i < position.bPieces.length; ++i) {
 					for (var j = 0; j < position.bPieces[i]; ++j) {
 						newPieces.push({
-							label: LABEL_TABLE[i + 2],
+							label: LABEL_TABLE[i + 1],
 							black: true,
 							x: 512 + 6 * j,
 							y: 372 - 22 - i * 40,
@@ -164,7 +164,7 @@
 				for (var i = 0; i < position.wPieces.length; ++i) {
 					for (var j = 0; j < position.wPieces[i]; ++j) {
 						newPieces.push({
-							label: LABEL_TABLE[i + 2],
+							label: LABEL_TABLE[i + 1],
 							black: false,
 							x: 20 + 6 * j,
 							y: 22 + i * 40,
@@ -191,9 +191,9 @@
 						this.move_(fromIdx, toIdx, true);
 						break;
 					case 3:
-						this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 15];
-						this.unpromotedPiece.black = !!(position.player & 32), this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 15 | 16];
-						this.promotedPiece.black = !!(position.player & 32), this.promotionSelect.show = true;
+						this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7];
+						this.unpromotedPiece.black = !!(position.player & 16), this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7 | 8];
+						this.promotedPiece.black = !!(position.player & 16), this.promotionSelect.show = true;
 						this.promotionSelect.fromIdx = fromIdx;
 						this.promotionSelect.toIdx = toIdx;
 						this.promotionSelect.x = 102 + 41 * ((toIdx - 11) % 10) + 20;
@@ -209,7 +209,7 @@
 						fromIdx: fromIdx,
 						toIdx: toIdx,
 						from: 0,
-						to: (fromIdx & 15) + 2 | position.player,
+						to: (fromIdx & 7) + 1 | position.player,
 						capture: 0
 					});
 				} else {
@@ -218,7 +218,7 @@
 						fromIdx: fromIdx,
 						toIdx: toIdx,
 						from: from,
-						to: promote ? from | 16 : from,
+						to: promote ? from | 8 : from,
 						capture: position.board[toIdx]
 					});
 				}
@@ -229,18 +229,18 @@
 				if (position.isIgnoreCheck()) {
 					switch (this.gameMode) {
 						case "sente":
-							this.gameResult = position.player === 32 ? "あなたの勝ちです" : "あなたの負けです";
+							this.gameResult = position.player === 16 ? "あなたの勝ちです" : "あなたの負けです";
 							return;
 						case "gote":
-							this.gameResult = position.player === 64 ? "あなたの負けです" : "あなたの勝ちです";
+							this.gameResult = position.player === 32 ? "あなたの負けです" : "あなたの勝ちです";
 							return;
 						case "free":
-							this.gameResult = position.player === 32 ? "先手の勝ちです" : "後手の勝ちです";
+							this.gameResult = position.player === 16 ? "先手の勝ちです" : "後手の勝ちです";
 							return;
 					}
 				}
 
-				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 64) window.setTimeout(function () {
+				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 32) window.setTimeout(function () {
 					return _this.moveByAI();
 				}, 10);
 			},
@@ -249,7 +249,7 @@
 
 				var move = (0, _aiJs2["default"])(position, searchDepth);
 				if (move === null) {
-					this.gameResult = !(position.player === 32);
+					this.gameResult = "あなたの勝ちです";
 					return;
 				}
 				position.move(move);
@@ -260,13 +260,13 @@
 				if (position.isIgnoreCheck()) {
 					switch (this.gameMode) {
 						case "sente":
-							this.gameResult = position.player === 32 ? "あなたの勝ちです" : "あなたの負けです";
+							this.gameResult = position.player === 16 ? "あなたの勝ちです" : "あなたの負けです";
 							return;
 						case "gote":
-							this.gameResult = position.player === 64 ? "あなたの負けです" : "あなたの勝ちです";
+							this.gameResult = position.player === 32 ? "あなたの負けです" : "あなたの勝ちです";
 							return;
 						case "free":
-							this.gameResult = position.player === 32 ? "先手の勝ちです" : "後手の勝ちです";
+							this.gameResult = position.player === 16 ? "先手の勝ちです" : "後手の勝ちです";
 							return;
 					}
 				}
@@ -283,7 +283,7 @@
 				this.draw();
 
 				if (this.gameMode === "gote") {
-					position.player ^= 96;
+					position.player ^= 48;
 					window.setTimeout(function () {
 						return _this2.moveByAI();
 					}, 10);
@@ -296,7 +296,7 @@
 					this.selectedPiece = null;
 				} else if (this.selectedPiece && !(this.selectedPiece.index & 128) && !(piece.index & 128)) {
 					this.move(this.selectedPiece.index, piece.index);
-				} else if (piece.black === !!(position.player & 32)) {
+				} else if (piece.black === !!(position.player & 16)) {
 					this.selectedPiece = piece;
 				}
 			},
@@ -370,46 +370,46 @@
 		function Position() {
 			_classCallCheck(this, Position);
 
-			this.player = 32;
+			this.player = 16;
 			this.board = new Uint8Array(111);
 			this.bPieces = new Uint8Array(7);
 			this.wPieces = new Uint8Array(7);
 			this.history = [];
 
 			for (var i = 0; i < 10; ++i) {
-				this.board[i] = 128;
-				this.board[i * 10 + 10] = 128;
-				this.board[i + 101] = 128;
+				this.board[i] = 64;
+				this.board[i * 10 + 10] = 64;
+				this.board[i + 101] = 64;
 			}
 
-			this.board[11 + 10 * 0 + 0] = 71;
-			this.board[11 + 10 * 0 + 1] = 70;
-			this.board[11 + 10 * 0 + 2] = 69;
-			this.board[11 + 10 * 0 + 3] = 68;
-			this.board[11 + 10 * 0 + 4] = 65;
-			this.board[11 + 10 * 0 + 5] = 68;
-			this.board[11 + 10 * 0 + 6] = 69;
-			this.board[11 + 10 * 0 + 7] = 70;
-			this.board[11 + 10 * 0 + 8] = 71;
-			this.board[11 + 10 * 1 + 1] = 66;
-			this.board[11 + 10 * 1 + 7] = 67;
+			this.board[11 + 10 * 0 + 0] = 38;
+			this.board[11 + 10 * 0 + 1] = 37;
+			this.board[11 + 10 * 0 + 2] = 36;
+			this.board[11 + 10 * 0 + 3] = 35;
+			this.board[11 + 10 * 0 + 4] = 40;
+			this.board[11 + 10 * 0 + 5] = 35;
+			this.board[11 + 10 * 0 + 6] = 36;
+			this.board[11 + 10 * 0 + 7] = 37;
+			this.board[11 + 10 * 0 + 8] = 38;
+			this.board[11 + 10 * 1 + 1] = 33;
+			this.board[11 + 10 * 1 + 7] = 34;
 
 			for (var i = 0; i < 9; ++i) {
-				this.board[11 + 10 * 2 + i] = 72;
-			}this.board[11 + 10 * 8 + 0] = 39;
-			this.board[11 + 10 * 8 + 1] = 38;
-			this.board[11 + 10 * 8 + 2] = 37;
-			this.board[11 + 10 * 8 + 3] = 36;
-			this.board[11 + 10 * 8 + 4] = 33;
-			this.board[11 + 10 * 8 + 5] = 36;
-			this.board[11 + 10 * 8 + 6] = 37;
-			this.board[11 + 10 * 8 + 7] = 38;
-			this.board[11 + 10 * 8 + 8] = 39;
-			this.board[11 + 10 * 7 + 1] = 35;
-			this.board[11 + 10 * 7 + 7] = 34;
+				this.board[11 + 10 * 2 + i] = 39;
+			}this.board[11 + 10 * 8 + 0] = 22;
+			this.board[11 + 10 * 8 + 1] = 21;
+			this.board[11 + 10 * 8 + 2] = 20;
+			this.board[11 + 10 * 8 + 3] = 19;
+			this.board[11 + 10 * 8 + 4] = 24;
+			this.board[11 + 10 * 8 + 5] = 19;
+			this.board[11 + 10 * 8 + 6] = 20;
+			this.board[11 + 10 * 8 + 7] = 21;
+			this.board[11 + 10 * 8 + 8] = 22;
+			this.board[11 + 10 * 7 + 1] = 18;
+			this.board[11 + 10 * 7 + 7] = 17;
 
 			for (var i = 0; i < 9; ++i) {
-				this.board[11 + 10 * 6 + i] = 40;
+				this.board[11 + 10 * 6 + i] = 23;
 			}
 		}
 
@@ -418,18 +418,18 @@
 			value: function allMoves(ma, mi) {
 				var board = this.board,
 				    player = this.player,
-				    opPlayer = player ^ 96,
-				    pieces = player === 32 ? this.bPieces : this.wPieces,
+				    opPlayer = player ^ 48,
+				    pieces = player === 16 ? this.bPieces : this.wPieces,
 				    fuUsed = 1 << 0;
 
 				for (var i = 11; i < 101; ++i) {
 					var sq = board[i],
-					    promotable = player === 32 ? i < 40 : 70 < i,
+					    promotable = player === 16 ? i < 40 : 70 < i,
 					    j = undefined;
 
 					if (!(sq & player)) continue;
-					switch (sq & 31) {
-						case 1:
+					switch (sq & 15) {
+						case 8:
 							if (board[j = i - 11] === 0 || board[j] & opPlayer) {
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
@@ -455,161 +455,161 @@
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							break;
-						case 18:
+						case 9:
 							if (board[j = i - 11] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i - 9] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 11] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 9] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
-						case 2:
+						case 1:
 							for (j = i - 10; board[j] === 0; j -= 10) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i + 10; board[j] === 0; j += 10) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i - 1; board[j] === 0; j -= 1) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i + 1; board[j] === 0; j += 1) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							break;
-						case 19:
+						case 10:
 							if (board[j = i - 10] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 10] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i - 1] === 0 || board[j] & opPlayer) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 1] === 0 || board[j] & opPlayer) {
 								if (promotable) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
-						case 3:
+						case 2:
 							for (j = i - 11; board[j] === 0; j -= 11) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i - 9; board[j] === 0; j -= 9) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i + 9; board[j] === 0; j += 9) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							for (j = i + 11; board[j] === 0; j += 11) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
 							}
 							if (board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							break;
-						case 4:
-						case 21:
-						case 22:
-						case 23:
-						case 24:
+						case 3:
+						case 12:
+						case 13:
+						case 14:
+						case 15:
 							if (board[j = i - 10] === 0 || board[j] & opPlayer) {
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
@@ -622,7 +622,7 @@
 							if (board[j = i + 10] === 0 || board[j] & opPlayer) {
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
-							if (player === 32) {
+							if (player === 16) {
 								if (board[j = i - 11] === 0 || board[j] & opPlayer) {
 									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 								}
@@ -638,52 +638,52 @@
 								}
 							}
 							break;
-						case 5:
+						case 4:
 							if (board[j = i - 11] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i - 9] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 9] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
 							if (board[j = i + 11] === 0 || board[j] & opPlayer) {
-								if (promotable || (player === 32 ? j < 40 : 70 < j)) {
-									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+								if (promotable || (player === 16 ? j < 40 : 70 < j)) {
+									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 								}
 								ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 							}
-							if (player === 32) {
+							if (player === 16) {
 								if (board[j = i - 10] === 0 || board[j] & opPlayer) {
 									if (promotable || j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 								}
 							} else {
 								if (board[j = i + 10] === 0 || board[j] & opPlayer) {
 									if (promotable || 70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
 								}
 							}
 							break;
-						case 6:
-							if (player === 32) {
+						case 5:
+							if (player === 16) {
 								if (board[j = i - 21] === 0 || board[j] & opPlayer) {
 									if (j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (30 < j) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -691,7 +691,7 @@
 								}
 								if (board[j = i - 19] === 0 || board[j] & opPlayer) {
 									if (j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (30 < j) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -700,7 +700,7 @@
 							} else {
 								if (board[j = i + 19] === 0 || board[j] & opPlayer) {
 									if (70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (j < 80) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -708,7 +708,7 @@
 								}
 								if (board[j = i + 21] === 0 || board[j] & opPlayer) {
 									if (70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (j < 80) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -716,11 +716,11 @@
 								}
 							}
 							break;
-						case 7:
-							if (player === 32) {
+						case 6:
+							if (player === 16) {
 								for (j = i - 10; board[j] === 0; j -= 10) {
 									if (j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 									}
 									if (20 < j) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
@@ -728,7 +728,7 @@
 								}
 								if (board[j] & opPlayer) {
 									if (j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (20 < j) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -737,7 +737,7 @@
 							} else {
 								for (j = i + 10; board[j] === 0; j += 10) {
 									if (70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = 0;
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = 0;
 									}
 									if (j < 90) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = 0;
@@ -745,7 +745,7 @@
 								}
 								if (board[j] & opPlayer) {
 									if (70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (j < 90) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -753,11 +753,11 @@
 								}
 							}
 							break;
-						case 8:
-							if (player === 32) {
+						case 7:
+							if (player === 16) {
 								if (board[j = i - 10] === 0 || board[j] & opPlayer) {
 									if (j < 40) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (20 < j) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -766,7 +766,7 @@
 							} else {
 								if (board[j = i + 10] === 0 || board[j] & opPlayer) {
 									if (70 < j) {
-										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 16;ma[mi++] = board[j];
+										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq | 8;ma[mi++] = board[j];
 									}
 									if (j < 90) {
 										ma[mi++] = i;ma[mi++] = j;ma[mi++] = sq;ma[mi++] = sq;ma[mi++] = board[j];
@@ -781,50 +781,50 @@
 				for (var i = 11; i < 101; ++i) {
 					if (board[i] !== 0) continue;
 					if (pieces[0]) {
-						ma[mi++] = 128;ma[mi++] = i;mi++;ma[mi++] = 2 | player;ma[mi++] = 0;
+						ma[mi++] = 128;ma[mi++] = i;mi++;ma[mi++] = 1 | player;ma[mi++] = 0;
 					}
 					if (pieces[1]) {
-						ma[mi++] = 129;ma[mi++] = i;mi++;ma[mi++] = 3 | player;ma[mi++] = 0;
+						ma[mi++] = 129;ma[mi++] = i;mi++;ma[mi++] = 2 | player;ma[mi++] = 0;
 					}
 					if (pieces[2]) {
-						ma[mi++] = 130;ma[mi++] = i;mi++;ma[mi++] = 4 | player;ma[mi++] = 0;
+						ma[mi++] = 130;ma[mi++] = i;mi++;ma[mi++] = 3 | player;ma[mi++] = 0;
 					}
 					if (pieces[3]) {
-						ma[mi++] = 131;ma[mi++] = i;mi++;ma[mi++] = 5 | player;ma[mi++] = 0;
+						ma[mi++] = 131;ma[mi++] = i;mi++;ma[mi++] = 4 | player;ma[mi++] = 0;
 					}
 				}
-				if (player === 32) {
+				if (player === 16) {
 					if (pieces[4]) {
 						for (var i = 31; i < 101; ++i) {
 							if (board[i] === 0) {
-								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 32;ma[mi++] = 0;
+								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 5 | 16;ma[mi++] = 0;
 							}
 						}
 					}
 					for (var i = 21; i < 101; ++i) {
 						if (board[i] !== 0) continue;
 						if (pieces[5]) {
-							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 32;ma[mi++] = 0;
+							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 6 | 16;ma[mi++] = 0;
 						}
 						if (pieces[6] && !(fuUsed & 1 << i % 10)) {
-							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 32;ma[mi++] = 0;
+							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 7 | 16;ma[mi++] = 0;
 						}
 					}
 				} else {
 					if (pieces[4]) {
 						for (var i = 11; i < 81; ++i) {
 							if (board[i] === 0) {
-								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 6 | 64;ma[mi++] = 0;
+								ma[mi++] = 132;ma[mi++] = i;mi++;ma[mi++] = 5 | 32;ma[mi++] = 0;
 							}
 						}
 					}
 					for (var i = 11; i < 91; ++i) {
 						if (board[i] !== 0) continue;
 						if (pieces[5]) {
-							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 7 | 64;ma[mi++] = 0;
+							ma[mi++] = 133;ma[mi++] = i;mi++;ma[mi++] = 6 | 32;ma[mi++] = 0;
 						}
 						if (pieces[6] && !(fuUsed & 1 << i % 10)) {
-							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 8 | 64;ma[mi++] = 0;
+							ma[mi++] = 134;ma[mi++] = i;mi++;ma[mi++] = 7 | 32;ma[mi++] = 0;
 						}
 					}
 				}
@@ -842,17 +842,17 @@
 				if (fromIdx & 128) {
 					board[toIdx] = _move.to;
 
-					if (player & 32) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
+					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 				} else {
 					board[toIdx] = _move.to;
 					board[fromIdx] = 0;
 
 					var capture = _move.capture;
 					if (capture) {
-						if (player & 32) this.bPieces[PIECES_INDEX_TABLE[capture & 15]] += 1;else this.wPieces[PIECES_INDEX_TABLE[capture & 15]] += 1;
+						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 					}
 				}
-				this.player = player ^ 96;
+				this.player = player ^ 48;
 				this.history.push(_move);
 			}
 		}, {
@@ -862,12 +862,12 @@
 				    fromIdx = move.fromIdx,
 				    toIdx = move.toIdx,
 				    board = this.board,
-				    player = this.player ^= 96;
+				    player = this.player ^= 48;
 
 				if (fromIdx & 128) {
 					board[toIdx] = 0;
 
-					if (player & 32) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
+					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 				} else {
 					board[fromIdx] = move.from;
 
@@ -875,7 +875,7 @@
 					if (capture) {
 						board[toIdx] = capture;
 
-						if (player & 32) this.bPieces[PIECES_INDEX_TABLE[capture & 15]] -= 1;else this.wPieces[PIECES_INDEX_TABLE[capture & 15]] -= 1;
+						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 					} else {
 						board[toIdx] = 0;
 					}
@@ -892,17 +892,17 @@
 				if (fromIdx & 128) {
 					board[toIdx] = ma[mi + 3];
 
-					if (player & 32) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
+					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 				} else {
 					board[toIdx] = ma[mi + 3];
 					board[fromIdx] = 0;
 
 					var capture = ma[mi + 4];
 					if (capture) {
-						if (player & 32) this.bPieces[PIECES_INDEX_TABLE[capture & 15]] += 1;else this.wPieces[PIECES_INDEX_TABLE[capture & 15]] += 1;
+						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 					}
 				}
-				this.player = player ^ 96;
+				this.player = player ^ 48;
 			}
 		}, {
 			key: "unmove_",
@@ -910,12 +910,12 @@
 				var fromIdx = ma[mi],
 				    toIdx = ma[mi + 1],
 				    board = this.board,
-				    player = this.player ^= 96;
+				    player = this.player ^= 48;
 
 				if (fromIdx & 128) {
 					board[toIdx] = 0;
 
-					if (player & 32) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
+					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 				} else {
 					board[fromIdx] = ma[mi + 2];
 
@@ -923,7 +923,7 @@
 					if (capture) {
 						board[toIdx] = capture;
 
-						if (player & 32) this.bPieces[PIECES_INDEX_TABLE[capture & 15]] -= 1;else this.wPieces[PIECES_INDEX_TABLE[capture & 15]] -= 1;
+						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 					} else {
 						board[toIdx] = 0;
 					}
@@ -934,7 +934,7 @@
 			value: function isIgnoreCheck() {
 				var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
 				    mi = this.allMoves(moveArray, 0);
-				for (var i = 0; i < mi; i += 5) if ((moveArray[i + 4] & 31) === 1) return true;;
+				for (var i = 0; i < mi; i += 5) if ((moveArray[i + 4] & 15) === 8) return true;;
 				return false;
 			}
 		}, {
@@ -952,16 +952,6 @@
 	})();
 
 	exports["default"] = Position;
-
-	var PIECES_INDEX_TABLE = {
-		2: 0,
-		3: 1,
-		4: 2,
-		5: 3,
-		6: 4,
-		7: 5,
-		8: 6
-	};
 
 	module.exports = Position;
 	module.exports = exports["default"];
@@ -983,21 +973,21 @@
 
 	var _positionJs2 = _interopRequireDefault(_positionJs);
 
-	var PIECE_SCORE_TABLE = new Uint16Array(24 + 1);
-	PIECE_SCORE_TABLE[1] = 500;
-	PIECE_SCORE_TABLE[2] = 50;
-	PIECE_SCORE_TABLE[3] = 45;
-	PIECE_SCORE_TABLE[4] = 30;
-	PIECE_SCORE_TABLE[5] = 27;
-	PIECE_SCORE_TABLE[6] = 18;
-	PIECE_SCORE_TABLE[7] = 16;
-	PIECE_SCORE_TABLE[8] = 10;
-	PIECE_SCORE_TABLE[18] = 70;
-	PIECE_SCORE_TABLE[19] = 65;
-	PIECE_SCORE_TABLE[21] = 30;
-	PIECE_SCORE_TABLE[22] = 30;
-	PIECE_SCORE_TABLE[23] = 30;
-	PIECE_SCORE_TABLE[24] = 30;
+	var PIECE_SCORE_TABLE = new Uint16Array(16);
+	PIECE_SCORE_TABLE[1] = 50;
+	PIECE_SCORE_TABLE[2] = 45;
+	PIECE_SCORE_TABLE[3] = 30;
+	PIECE_SCORE_TABLE[4] = 27;
+	PIECE_SCORE_TABLE[5] = 18;
+	PIECE_SCORE_TABLE[6] = 16;
+	PIECE_SCORE_TABLE[7] = 10;
+	PIECE_SCORE_TABLE[8] = 500;
+	PIECE_SCORE_TABLE[9] = 70;
+	PIECE_SCORE_TABLE[10] = 65;
+	PIECE_SCORE_TABLE[12] = 30;
+	PIECE_SCORE_TABLE[13] = 30;
+	PIECE_SCORE_TABLE[14] = 30;
+	PIECE_SCORE_TABLE[15] = 30;
 
 	var MAX_SEARCH_DEPTH = 5;
 
@@ -1010,7 +1000,7 @@
 		    score = 0;
 		for (var i = 11; i < 101; ++i) {
 			var sq = board[i];
-			if (sq & 32) score += PIECE_SCORE_TABLE[sq & 31];else if (sq & 64) score -= PIECE_SCORE_TABLE[sq & 31];
+			if (sq & 16) score += PIECE_SCORE_TABLE[sq & 15];else if (sq & 32) score -= PIECE_SCORE_TABLE[sq & 15];
 		}
 		score += bPieces[0] * 60;
 		score += bPieces[1] * 55;
@@ -1046,13 +1036,13 @@
 	}
 
 	function search(position, depth, alpha, beta, mi) {
-		if (depth === 0) return position.player === 32 ? evalPosition(position) : -evalPosition(position);
+		if (depth === 0) return position.player === 16 ? evalPosition(position) : -evalPosition(position);
 
 		var mi2 = position.allMoves(moveArray, mi);
 		//sortMoves(position, mi, mi2);
 
 		for (var i = mi; i < mi2; i += 5) {
-			if ((moveArray[i + 4] & 31) === 1) return 65534;
+			if ((moveArray[i + 4] & 15) === 8) return 65534;
 
 			position.move_(moveArray, i);
 			var score = -search(position, depth - 1, -beta, -alpha, mi2);
@@ -1073,7 +1063,7 @@
 		var bestMove = -1,
 		    alpha = -65535;
 		for (var i = 0; i < mi; i += 5) {
-			if ((moveArray[i + 4] & 31) === 1) return "check mated";
+			if ((moveArray[i + 4] & 15) === 8) return "check mated";
 
 			position.move_(moveArray, i);
 			var score = -search(position, depth - 1, -65535, -alpha, mi);

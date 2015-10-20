@@ -5,20 +5,20 @@ import pieceComponent from "./components/piece.vue";
 
 
 const LABEL_TABLE = {
-	0b00001: "玉将",
-	0b00010: "飛車",
-	0b00011: "角行",
-	0b00100: "金将",
-	0b00101: "銀将",
-	0b00110: "桂馬",
-	0b00111: "香車",
-	0b01000: "歩兵",
-	0b10010: "竜王",
-	0b10011: "竜馬",
-	0b10101: "成銀",
-	0b10110: "成桂",
-	0b10111: "成香",
-	0b11000: "と金",
+	0b0001: "飛車",
+	0b0010: "角行",
+	0b0011: "金将",
+	0b0100: "銀将",
+	0b0101: "桂馬",
+	0b0110: "香車",
+	0b0111: "歩兵",
+	0b1000: "玉将",
+	0b1001: "竜王",
+	0b1010: "竜馬",
+	0b1100: "成銀",
+	0b1101: "成桂",
+	0b1110: "成香",
+	0b1111: "と金",
 };
 
 var position = new Position();
@@ -79,11 +79,11 @@ var appVm = new Vue({
 			var newPieces = [];
 			for (let i = 0; i < position.board.length; ++i) {
 				let sq = position.board[i],
-				label = LABEL_TABLE[sq & 0b11111];
+				label = LABEL_TABLE[sq & 0b1111];
 				if (label) {
 					newPieces.push({
 						label: label,
-						black: !!(sq & 0b0100000),
+						black: !!(sq & 0b010000),
 						x: 100 + 2 + 41 * ((i - 11) % 10) + 20,
 						y: 2 + 41 * ((i - 11) / 10 | 0) + 20,
 						index: i,
@@ -94,7 +94,7 @@ var appVm = new Vue({
 			for (let i = 0; i < position.bPieces.length; ++i) {
 				for (let j = 0; j < position.bPieces[i]; ++j) {
 					newPieces.push({
-						label: LABEL_TABLE[i + 2],
+						label: LABEL_TABLE[i + 1],
 						black: true,
 						x: 512 + 6 * j,
 						y: 372 - 22 - i * 40,
@@ -106,7 +106,7 @@ var appVm = new Vue({
 			for (let i = 0; i < position.wPieces.length; ++i) {
 				for (let j = 0; j < position.wPieces[i]; ++j) {
 					newPieces.push({
-						label: LABEL_TABLE[i + 2],
+						label: LABEL_TABLE[i + 1],
 						black: false,
 						x: 20 + 6 * j,
 						y: 22 + i * 40,
@@ -133,10 +133,10 @@ var appVm = new Vue({
 				this.move_(fromIdx, toIdx, true);
 				break;
 			case 3:
-				this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111];
-				this.unpromotedPiece.black = !!(position.player & 0b0100000),
-				this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b1111 | 0b10000];
-				this.promotedPiece.black = !!(position.player & 0b0100000),
+				this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b111];
+				this.unpromotedPiece.black = !!(position.player & 0b010000),
+				this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b111 | 0b1000];
+				this.promotedPiece.black = !!(position.player & 0b010000),
 				this.promotionSelect.show = true;
 				this.promotionSelect.fromIdx = fromIdx;
 				this.promotionSelect.toIdx = toIdx;
@@ -151,7 +151,7 @@ var appVm = new Vue({
 					fromIdx,
 					toIdx,
 					from: 0,
-					to: (fromIdx & 0b1111) + 2 | position.player,
+					to: (fromIdx & 0b111) + 1 | position.player,
 					capture: 0,
 				});
 			} else {
@@ -160,7 +160,7 @@ var appVm = new Vue({
 					fromIdx,
 					toIdx,
 					from: from,
-					to: promote ? from | 0b10000 : from,
+					to: promote ? from | 0b1000 : from,
 					capture: position.board[toIdx],
 				});
 			}
@@ -171,18 +171,18 @@ var appVm = new Vue({
 			if (position.isIgnoreCheck()) {
 				switch (this.gameMode) {
 				case "sente":
-					this.gameResult = (position.player === 0b0100000) ? "あなたの勝ちです" : "あなたの負けです";
+					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
 					return;
 				case "gote":
-					this.gameResult = (position.player === 0b1000000) ? "あなたの負けです" : "あなたの勝ちです";
+					this.gameResult = (position.player === 0b100000) ? "あなたの負けです" : "あなたの勝ちです";
 					return;
 				case "free":
-					this.gameResult = (position.player === 0b0100000) ? "先手の勝ちです" : "後手の勝ちです";
+					this.gameResult = (position.player === 0b010000) ? "先手の勝ちです" : "後手の勝ちです";
 					return;
 				}
 			}
 
-			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b1000000)
+			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
 				window.setTimeout(() => this.moveByAI(), 10);
 		},
 		moveByAI() {
@@ -191,7 +191,7 @@ var appVm = new Vue({
 
 			var move = ai(position, searchDepth);
 			if (move === null) {
-				this.gameResult = !(position.player === 0b0100000);
+				this.gameResult = "あなたの勝ちです";
 				return;
 			}
 			position.move(move);
@@ -202,13 +202,13 @@ var appVm = new Vue({
 			if (position.isIgnoreCheck()) {
 				switch (this.gameMode) {
 				case "sente":
-					this.gameResult = (position.player === 0b0100000) ? "あなたの勝ちです" : "あなたの負けです";
+					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
 					return;
 				case "gote":
-					this.gameResult = (position.player === 0b1000000) ? "あなたの負けです" :"あなたの勝ちです";
+					this.gameResult = (position.player === 0b100000) ? "あなたの負けです" :"あなたの勝ちです";
 					return;
 				case "free":
-					this.gameResult = (position.player === 0b0100000) ? "先手の勝ちです" : "後手の勝ちです";
+					this.gameResult = (position.player === 0b010000) ? "先手の勝ちです" : "後手の勝ちです";
 					return;
 				}
 			}
@@ -224,7 +224,7 @@ var appVm = new Vue({
 			this.draw();
 
 			if (this.gameMode === "gote") {
-				position.player ^= 0b1100000;
+				position.player ^= 0b110000;
 				window.setTimeout(() => this.moveByAI(), 10);
 			}
 		},
@@ -238,7 +238,7 @@ var appVm = new Vue({
 								 !(this.selectedPiece.index & 0b10000000) &&
 								 !(piece.index & 0b10000000)) {
 				this.move(this.selectedPiece.index, piece.index);
-			} else if (piece.black === !!(position.player & 0b0100000)) {
+			} else if (piece.black === !!(position.player & 0b010000)) {
 				this.selectedPiece = piece;
 			}
 		},
