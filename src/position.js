@@ -11,6 +11,7 @@ export default class Position {
 		this.board = new Uint8Array(111);
 		this.bPieces = new Uint8Array(7);
 		this.wPieces = new Uint8Array(7);
+		this.hash1 = 0;
 		this.history = [];
 
 		for (let i = 0; i < 10; ++i) {
@@ -394,18 +395,22 @@ export default class Position {
 	move(move) {
 		const fromIdx = move.fromIdx,
 		toIdx = move.toIdx,
+		to = move.to,
 		board = this.board,
 		player = this.player;
 
 		if (fromIdx & 0b10000000) {
-			board[toIdx] = move.to;
+			board[toIdx] = to;
 
 			if (player === 0b010000)
 				this.bPieces[fromIdx & 0b1111111] -= 1;
 			else
 				this.wPieces[fromIdx & 0b1111111] -= 1;
+
+			this.hash1 ^= (to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
-			board[toIdx] = move.to;
+			board[toIdx] = to;
 			board[fromIdx] = 0b000000;
 
 			var capture = move.capture;
@@ -414,6 +419,14 @@ export default class Position {
 					this.bPieces[(capture & 0b111) - 1] += 1;
 				else
 					this.wPieces[(capture & 0b111) - 1] += 1;
+
+				this.hash1 ^= (move.from * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					(capture * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+			} else {
+				this.hash1 ^= (move.from * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx));
 			}
 		}
 		this.player = player ^ 0b110000;
@@ -424,6 +437,7 @@ export default class Position {
 		const move = this.history.pop(),
 		fromIdx = move.fromIdx,
 		toIdx = move.toIdx,
+		to = move.to,
 		board = this.board,
 		player = this.player ^= 0b110000;
 
@@ -434,6 +448,9 @@ export default class Position {
 				this.bPieces[fromIdx & 0b1111111] += 1;
 			else
 				this.wPieces[fromIdx & 0b1111111] += 1;
+
+			this.hash1 ^= (to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
 			board[fromIdx] = move.from;
 
@@ -445,8 +462,16 @@ export default class Position {
 					this.bPieces[(capture & 0b111) - 1] -= 1;
 				else
 					this.wPieces[(capture & 0b111) - 1] -= 1;
+
+				this.hash1 ^= (move.from * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					(capture * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 			} else {
 				board[toIdx] = 0b000000;
+
+				this.hash1 ^= (move.from * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx));
 			}
 		}
 	}
@@ -454,18 +479,22 @@ export default class Position {
 	move_(ma, mi) {
 		const fromIdx = ma[mi],
 		toIdx = ma[mi+1],
+		to = ma[mi+3],
 		board = this.board,
 		player = this.player;
 
 		if (fromIdx & 0b10000000) {
-			board[toIdx] = ma[mi+3];
+			board[toIdx] = to;
 
 			if (player === 0b010000)
 				this.bPieces[fromIdx & 0b1111111] -= 1;
 			else
 				this.wPieces[fromIdx & 0b1111111] -= 1;
+
+			this.hash1 ^= (to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
-			board[toIdx] = ma[mi+3];
+			board[toIdx] = to;
 			board[fromIdx] = 0b000000;
 
 			var capture = ma[mi+4];
@@ -474,6 +503,14 @@ export default class Position {
 					this.bPieces[(capture & 0b111) - 1] += 1;
 				else
 					this.wPieces[(capture & 0b111) - 1] += 1;
+
+				this.hash1 ^= (ma[mi+2] * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(ma[mi+2] * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					(capture * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+			} else {
+				this.hash1 ^= (ma[mi+2] * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx));
 			}
 		}
 		this.player = player ^ 0b110000;
@@ -482,6 +519,7 @@ export default class Position {
 	unmove_(ma, mi) {
 		const fromIdx = ma[mi],
 		toIdx = ma[mi+1],
+		to = ma[mi+3],
 		board = this.board,
 		player = this.player ^= 0b110000;
 
@@ -492,6 +530,9 @@ export default class Position {
 				this.bPieces[fromIdx & 0b1111111] += 1;
 			else
 				this.wPieces[fromIdx & 0b1111111] += 1;
+
+			this.hash1 ^= (to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
 			board[fromIdx] = ma[mi+2];
 
@@ -503,8 +544,16 @@ export default class Position {
 					this.bPieces[(capture & 0b111) - 1] -= 1;
 				else
 					this.wPieces[(capture & 0b111) - 1] -= 1;
+
+				this.hash1 ^= (ma[mi+2] * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(ma[mi+2] * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					(capture * (222630977 + (1 << (toIdx & 0b1111)) - toIdx)) ^
+					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 			} else {
 				board[toIdx] = 0b000000;
+
+				this.hash1 ^= (ma[mi+2] * (222630977 + (1 << (fromIdx & 0b1111)) - fromIdx)) ^
+					(to * (222630977 + (1 << (toIdx & 0b1111)) - toIdx));
 			}
 		}
 	}

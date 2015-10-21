@@ -230,6 +230,7 @@
 						capture: position.board[toIdx]
 					});
 				}
+				console.log(("00000000000000000000000000000000" + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32));
 
 				this.draw();
 				this.selectedPiece = null;
@@ -264,6 +265,7 @@
 					return;
 				}
 				position.move(move);
+				console.log(("00000000000000000000000000000000" + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32));
 
 				this.promotionSelect.show = false;
 				this.draw();
@@ -389,6 +391,7 @@
 			this.board = new Uint8Array(111);
 			this.bPieces = new Uint8Array(7);
 			this.wPieces = new Uint8Array(7);
+			this.hash1 = 0;
 			this.history = [];
 
 			for (var i = 0; i < 10; ++i) {
@@ -851,20 +854,27 @@
 			value: function move(_move) {
 				var fromIdx = _move.fromIdx,
 				    toIdx = _move.toIdx,
+				    to = _move.to,
 				    board = this.board,
 				    player = this.player;
 
 				if (fromIdx & 128) {
-					board[toIdx] = _move.to;
+					board[toIdx] = to;
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
+
+					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
-					board[toIdx] = _move.to;
+					board[toIdx] = to;
 					board[fromIdx] = 0;
 
 					var capture = _move.capture;
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
+
+						this.hash1 ^= _move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+					} else {
+						this.hash1 ^= _move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
 					}
 				}
 				this.player = player ^ 48;
@@ -876,6 +886,7 @@
 				var move = this.history.pop(),
 				    fromIdx = move.fromIdx,
 				    toIdx = move.toIdx,
+				    to = move.to,
 				    board = this.board,
 				    player = this.player ^= 48;
 
@@ -883,6 +894,8 @@
 					board[toIdx] = 0;
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
+
+					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[fromIdx] = move.from;
 
@@ -891,8 +904,12 @@
 						board[toIdx] = capture;
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
+
+						this.hash1 ^= move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
 						board[toIdx] = 0;
+
+						this.hash1 ^= move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
 					}
 				}
 			}
@@ -901,20 +918,27 @@
 			value: function move_(ma, mi) {
 				var fromIdx = ma[mi],
 				    toIdx = ma[mi + 1],
+				    to = ma[mi + 3],
 				    board = this.board,
 				    player = this.player;
 
 				if (fromIdx & 128) {
-					board[toIdx] = ma[mi + 3];
+					board[toIdx] = to;
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
+
+					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
-					board[toIdx] = ma[mi + 3];
+					board[toIdx] = to;
 					board[fromIdx] = 0;
 
 					var capture = ma[mi + 4];
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
+
+						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ ma[mi + 2] * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+					} else {
+						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
 					}
 				}
 				this.player = player ^ 48;
@@ -924,6 +948,7 @@
 			value: function unmove_(ma, mi) {
 				var fromIdx = ma[mi],
 				    toIdx = ma[mi + 1],
+				    to = ma[mi + 3],
 				    board = this.board,
 				    player = this.player ^= 48;
 
@@ -931,6 +956,8 @@
 					board[toIdx] = 0;
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
+
+					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[fromIdx] = ma[mi + 2];
 
@@ -939,8 +966,12 @@
 						board[toIdx] = capture;
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
+
+						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ ma[mi + 2] * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
 						board[toIdx] = 0;
+
+						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
 					}
 				}
 			}

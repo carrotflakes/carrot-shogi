@@ -167,6 +167,8 @@ var appVm = new Vue({
 					capture: position.board[toIdx],
 				});
 			}
+			console.log(("00000000000000000000000000000000" +
+									 (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32));
 
 			this.draw();
 			this.selectedPiece = null;
@@ -201,6 +203,8 @@ var appVm = new Vue({
 				return;
 			}
 			position.move(move);
+			console.log(("00000000000000000000000000000000" +
+									 (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32));
 
 			this.promotionSelect.show = false;
 			this.draw();
