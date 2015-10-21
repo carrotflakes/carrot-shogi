@@ -393,6 +393,7 @@
 			this.wPieces = new Uint8Array(7);
 			this.hash1 = 0;
 			this.history = [];
+			this.hash1Counts = {};
 
 			for (var i = 0; i < 10; ++i) {
 				this.board[i] = 64;
@@ -857,13 +858,14 @@
 				    to = _move.to,
 				    board = this.board,
 				    player = this.player;
+				this.hash1Counts[this.hash1] = (this.hash1Counts[this.hash1] | 0) + 1;
 
 				if (fromIdx & 128) {
 					board[toIdx] = to;
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 
-					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[toIdx] = to;
 					board[fromIdx] = 0;
@@ -872,9 +874,9 @@
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 
-						this.hash1 ^= _move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash1 ^= _move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
-						this.hash1 ^= _move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
+						this.hash1 ^= _move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 				this.player = player ^ 48;
@@ -895,7 +897,7 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 
-					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[fromIdx] = move.from;
 
@@ -905,13 +907,14 @@
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 
-						this.hash1 ^= move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
 						board[toIdx] = 0;
 
-						this.hash1 ^= move.from * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
+						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
+				this.hash1Counts[this.hash1] -= 1;
 			}
 		}, {
 			key: "move_",
@@ -927,7 +930,7 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 
-					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[toIdx] = to;
 					board[fromIdx] = 0;
@@ -936,9 +939,9 @@
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ ma[mi + 2] * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
-						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
+						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 				this.player = player ^ 48;
@@ -957,7 +960,7 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 
-					this.hash1 ^= to * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[fromIdx] = ma[mi + 2];
 
@@ -967,11 +970,11 @@
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ ma[mi + 2] * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ capture * (222630977 + (1 << (toIdx & 15)) - toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
 						board[toIdx] = 0;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (1 << (fromIdx & 15)) - fromIdx) ^ to * (222630977 + (1 << (toIdx & 15)) - toIdx);
+						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 			}
