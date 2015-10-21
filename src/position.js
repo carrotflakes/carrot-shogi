@@ -570,6 +570,10 @@ export default class Position {
 		return false;
 	}
 
+	isSennichite() {
+		return this.hash1Counts[this.hash1] === 3;
+	}
+
 	canMove(fromIdx, toIdx) {
 		var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
 		mi = this.allMoves(moveArray, 0),

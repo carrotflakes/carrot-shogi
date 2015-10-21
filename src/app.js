@@ -173,19 +173,12 @@ var appVm = new Vue({
 			this.draw();
 			this.selectedPiece = null;
 
-			if (position.isIgnoreCheck()) {
-				this.sound && sound.pipu();
-				switch (this.gameMode) {
-				case "sente":
-					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
-					return;
-				case "gote":
-					this.gameResult = (position.player === 0b100000) ? "あなたの負けです" : "あなたの勝ちです";
-					return;
-				case "free":
-					this.gameResult = (position.player === 0b010000) ? "先手の勝ちです" : "後手の勝ちです";
-					return;
-				}
+			if (position.isSennichite()) {
+				this.gameEnd(null, "千日手");
+				return;
+			} else if (position.isIgnoreCheck()) {
+				this.gameEnd(position.player === 0b010000 ? "shimote" : "kamite", "");
+				return;
 			}
 
 			this.sound && sound.pi();
@@ -209,21 +202,33 @@ var appVm = new Vue({
 			this.promotionSelect.show = false;
 			this.draw();
 
-			if (position.isIgnoreCheck()) {
-				this.sound && sound.pipu();
+			if (position.isSennichite()) {
+				this.gameEnd(null, "千日手");
+				return;
+			} else if (position.isIgnoreCheck()) {
+				this.gameEnd(position.player === 0b010000 ? "shimote" : "kamite", "");
+				return;
+			}
+
+			this.sound && sound.pi();
+		},
+		gameEnd(winner, message) {
+			if (winner === null) {
+					this.gameResult = "引き分けです " + message;
+			} else {
 				switch (this.gameMode) {
 				case "sente":
-					this.gameResult = (position.player === 0b010000) ? "あなたの勝ちです" : "あなたの負けです";
-					return;
+					this.gameResult = (winner === "shimote" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+					break;
 				case "gote":
-					this.gameResult = (position.player === 0b100000) ? "あなたの負けです" :"あなたの勝ちです";
-					return;
+					this.gameResult = (winner === "kamite"  ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+					break;
 				case "free":
-					this.gameResult = (position.player === 0b010000) ? "先手の勝ちです" : "後手の勝ちです";
-					return;
+					this.gameResult = (winner === "shimote" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
+					break;
 				}
 			}
-			this.sound && sound.pi();
+			this.sound && sound.pipu();
 		},
 		gameStart(mode) {
 			if (["sente", "gote", "free"].indexOf(mode) === -1)
