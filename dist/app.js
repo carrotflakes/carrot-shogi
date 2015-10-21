@@ -133,7 +133,7 @@
 				this.gameResult = null;
 			},
 			matta: function matta() {
-				if (this.gameMove === null || this.gameResult !== null || position.history.length < 2) return;
+				if (this.gameMode === null || this.gameResult !== null || position.history.length < 2) return;
 
 				this.selectedPiece = null;
 				position.unmove();

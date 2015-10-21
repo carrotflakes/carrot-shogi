@@ -69,7 +69,7 @@ var appVm = new Vue({
 			this.gameResult = null;
 		},
 		matta() {
-			if (this.gameMove === null || this.gameResult !== null || position.history.length < 2)
+			if (this.gameMode === null || this.gameResult !== null || position.history.length < 2)
 				return;
 
 			this.selectedPiece = null;
