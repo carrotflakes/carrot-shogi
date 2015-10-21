@@ -20,6 +20,7 @@ position: absolute;
 left: 50%;
 width: 572px;
 margin-left: -286px;
+margin-top: 10px;
 }
 
 .svg-button {
@@ -45,9 +46,9 @@ font-weight: bold;
 
 	<rect fill="#B08854" x="100" y="0" width="372" height="372" />
 	<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
-				x="1" y="1" width="80" height="282" />
+				x="1" y="1" width="96" height="282" />
 	<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
-				x="491" y="89" width="80" height="282" />
+				x="475" y="89" width="96" height="282" />
 
 	<g>
 		<template v-repeat="y in [0,1,2,3,4,5,6,7,8]">
@@ -131,14 +132,14 @@ font-weight: bold;
 			 v-on="click: gameStart('sente')">
 			<rect fill="#F56F49"
 						x="0" y="0" width="150" height="38" />
-			<text fill="#000" x="6" y="28" font-size="24">先手で対局</text>
+			<text fill="#000" x="6" y="26" font-size="20">先手で対局</text>
 		</g>
 		<g class="svg-button"
 			 transform="translate(-75, 130)"
 			 v-on="click: gameStart('gote')">
 			<rect fill="#F56F49"
 						x="0" y="0" width="150" height="38" />
-			<text fill="#000" x="6" y="28" font-size="24">後手で対局</text>
+			<text fill="#000" x="6" y="26" font-size="20">後手で対局</text>
 		</g>
 	</g>
 

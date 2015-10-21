@@ -99,7 +99,7 @@ var appVm = new Vue({
 					newPieces.push({
 						label: LABEL_TABLE[i + 1],
 						black: true,
-						x: 512 + 6 * j,
+						x: 496 + 4 * j,
 						y: 372 - 22 - i * 40,
 						index: i ^ 0b10000000,
 						_uid: (1 << 16) + (i << 8) + j,
@@ -111,7 +111,7 @@ var appVm = new Vue({
 					newPieces.push({
 						label: LABEL_TABLE[i + 1],
 						black: false,
-						x: 20 + 6 * j,
+						x: 20 + 4 * j,
 						y: 22 + i * 40,
 						index: i ^ 0b10000000,
 						_uid: (2 << 16) + (i << 8) + j,
