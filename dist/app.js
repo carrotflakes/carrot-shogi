@@ -125,7 +125,12 @@
 				fromIdx: 0,
 				toIdx: 0
 			},
-			sound: true
+			sound: true,
+			enableDebug: false,
+			debugInfo: {
+				hash1: null,
+				check: null
+			}
 		},
 		methods: {
 			init: function init() {
@@ -185,6 +190,9 @@
 
 				var hl = position.history.length;
 				this.lastMoveIndex = hl > 0 ? position.history[hl - 1].toIdx : 0;
+
+				this.debugInfo.hash1 = (new Array(32 + 1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32);
+				this.debugInfo.check = position.check;
 			},
 			move: function move(fromIdx, toIdx) {
 				if (fromIdx === toIdx) {
@@ -230,7 +238,6 @@
 						capture: position.board[toIdx]
 					});
 				}
-				console.log(("00000000000000000000000000000000" + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32));
 
 				this.draw();
 				this.selectedPiece = null;
@@ -258,7 +265,6 @@
 					return;
 				}
 				position.move(move);
-				console.log(("00000000000000000000000000000000" + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32));
 
 				this.promotionSelect.show = false;
 				this.draw();
@@ -342,6 +348,7 @@
 	});
 
 	searchDepth = +getUrlParameter("sd", searchDepth);
+	appVm.enableDebug = !!getUrlParameter("debug", false);
 	appVm.init();
 
 	function getUrlParameter(key, def) {

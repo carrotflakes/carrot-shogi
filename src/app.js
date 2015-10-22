@@ -62,6 +62,11 @@ var appVm = new Vue({
 			toIdx: 0,
 		},
 		sound: true,
+		enableDebug: false,
+		debugInfo: {
+			hash1: null,
+			check: null,
+		},
 	},
 	methods: {
 		init() {
@@ -122,6 +127,10 @@ var appVm = new Vue({
 
 			var hl = position.history.length;
 			this.lastMoveIndex = hl > 0 ? position.history[hl-1].toIdx : 0;
+
+			this.debugInfo.hash1 =
+				(new Array(32+1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32);
+			this.debugInfo.check = position.check;
 		},
 		move(fromIdx, toIdx) {
 			if (fromIdx === toIdx) {
@@ -167,8 +176,6 @@ var appVm = new Vue({
 					capture: position.board[toIdx],
 				});
 			}
-			console.log(("00000000000000000000000000000000" +
-									 (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32));
 
 			this.draw();
 			this.selectedPiece = null;
@@ -196,8 +203,6 @@ var appVm = new Vue({
 				return;
 			}
 			position.move(move);
-			console.log(("00000000000000000000000000000000" +
-									 (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32));
 
 			this.promotionSelect.show = false;
 			this.draw();
@@ -284,6 +289,7 @@ var appVm = new Vue({
 
 
 searchDepth = +getUrlParameter("sd", searchDepth);
+appVm.enableDebug = !!getUrlParameter("debug", false);
 appVm.init();
 
 
