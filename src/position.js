@@ -637,10 +637,17 @@ export default class Position {
 		}
 
 		if (this.isCheckMate()) {
-			return {
-				winner: this.player !== 0b010000 ? "black" : "white",
-				reason: null,
-			};
+			if (this.history[this.count-1].fromIdx === 0b10000110) {
+				return {
+					winner: this.player === 0b010000 ? "black" : "white",
+					reason: "打ち歩詰め",
+				};
+			} else {
+				return {
+					winner: this.player !== 0b010000 ? "black" : "white",
+					reason: null,
+				};
+			}
 		}
 
 		if (this.isIgnoreCheck()) {

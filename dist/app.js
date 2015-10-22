@@ -1063,10 +1063,17 @@
 				}
 
 				if (this.isCheckMate()) {
-					return {
-						winner: this.player !== 16 ? "black" : "white",
-						reason: null
-					};
+					if (this.history[this.count - 1].fromIdx === 134) {
+						return {
+							winner: this.player === 16 ? "black" : "white",
+							reason: "打ち歩詰め"
+						};
+					} else {
+						return {
+							winner: this.player !== 16 ? "black" : "white",
+							reason: null
+						};
+					}
 				}
 
 				if (this.isIgnoreCheck()) {
