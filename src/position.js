@@ -14,6 +14,8 @@ export default class Position {
 		this.hash1 = 0;
 		this.history = [];
 		this.hash1Counts = {};
+		this.checkHistory = [];
+		this.check = false;
 
 		for (let i = 0; i < 10; ++i) {
 			this.board[i]       = 0b1000000;
@@ -433,6 +435,8 @@ export default class Position {
 		}
 		this.player = player ^ 0b110000;
 		this.history.push(move);
+		this.checkHistory.push(this.check);
+		this.check = this.isCheck();
 	}
 
 	unmove() {
@@ -442,6 +446,7 @@ export default class Position {
 		to = move.to,
 		board = this.board,
 		player = this.player ^= 0b110000;
+		this.check = this.checkHistory.pop();
 
 		if (fromIdx & 0b10000000) {
 			board[toIdx] = 0b000000;
@@ -559,6 +564,13 @@ export default class Position {
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx));
 			}
 		}
+	}
+
+	isCheck() {
+		this.player ^= 0b110000;
+		var ret = this.isIgnoreCheck();
+		this.player ^= 0b110000;
+		return ret;
 	}
 
 	isIgnoreCheck() {

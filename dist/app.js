@@ -399,6 +399,8 @@
 			this.hash1 = 0;
 			this.history = [];
 			this.hash1Counts = {};
+			this.checkHistory = [];
+			this.check = false;
 
 			for (var i = 0; i < 10; ++i) {
 				this.board[i] = 64;
@@ -886,6 +888,8 @@
 				}
 				this.player = player ^ 48;
 				this.history.push(_move);
+				this.checkHistory.push(this.check);
+				this.check = this.isCheck();
 			}
 		}, {
 			key: "unmove",
@@ -896,6 +900,7 @@
 				    to = move.to,
 				    board = this.board,
 				    player = this.player ^= 48;
+				this.check = this.checkHistory.pop();
 
 				if (fromIdx & 128) {
 					board[toIdx] = 0;
@@ -982,6 +987,14 @@
 						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
+			}
+		}, {
+			key: "isCheck",
+			value: function isCheck() {
+				this.player ^= 48;
+				var ret = this.isIgnoreCheck();
+				this.player ^= 48;
+				return ret;
 			}
 		}, {
 			key: "isIgnoreCheck",
