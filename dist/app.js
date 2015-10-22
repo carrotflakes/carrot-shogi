@@ -141,8 +141,8 @@
 				if (this.gameMode === null || this.gameResult !== null || position.count < 2) return;
 
 				this.selectedPiece = null;
-				position.unmove();
-				position.unmove();
+				position.undoMove();
+				position.undoMove();
 				this.promotionSelect.show = false;
 				this.draw();
 			},
@@ -220,7 +220,7 @@
 				var _this = this;
 
 				if (fromIdx & 128) {
-					position.move({
+					position.doMove({
 						fromIdx: fromIdx,
 						toIdx: toIdx,
 						from: 0,
@@ -229,7 +229,7 @@
 					});
 				} else {
 					var from = position.board[fromIdx];
-					position.move({
+					position.doMove({
 						fromIdx: fromIdx,
 						toIdx: toIdx,
 						from: from,
@@ -261,7 +261,7 @@
 					this.gameResult = "あなたの勝ちです";
 					return;
 				}
-				position.move(move);
+				position.doMove(move);
 
 				this.promotionSelect.show = false;
 				this.draw();
@@ -859,11 +859,11 @@
 				return mi;
 			}
 		}, {
-			key: "move",
-			value: function move(_move) {
-				var fromIdx = _move.fromIdx,
-				    toIdx = _move.toIdx,
-				    to = _move.to,
+			key: "doMove",
+			value: function doMove(move) {
+				var fromIdx = move.fromIdx,
+				    toIdx = move.toIdx,
+				    to = move.to,
 				    board = this.board,
 				    player = this.player;
 				this.hash1Counts[this.hash1] = (this.hash1Counts[this.hash1] | 0) + 1;
@@ -878,22 +878,22 @@
 					board[toIdx] = to;
 					board[fromIdx] = 0;
 
-					var capture = _move.capture;
+					var capture = move.capture;
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 
-						this.hash1 ^= _move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
-						this.hash1 ^= _move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 				this.player = player ^ 48;
-				this.history.push(_move);
+				this.history.push(move);
 				this.check = this.isCheck();
 			}
 		}, {
-			key: "unmove",
-			value: function unmove() {
+			key: "undoMove",
+			value: function undoMove() {
 				var move = this.history.pop(),
 				    fromIdx = move.fromIdx,
 				    toIdx = move.toIdx,
@@ -927,8 +927,8 @@
 				this.check = this.isCheck();
 			}
 		}, {
-			key: "move_",
-			value: function move_(ma, mi) {
+			key: "doMoveFast",
+			value: function doMoveFast(ma, mi) {
 				var fromIdx = ma[mi],
 				    toIdx = ma[mi + 1],
 				    to = ma[mi + 3],
@@ -957,8 +957,8 @@
 				this.player = player ^ 48;
 			}
 		}, {
-			key: "unmove_",
-			value: function unmove_(ma, mi) {
+			key: "undoMoveFast",
+			value: function undoMoveFast(ma, mi) {
 				var fromIdx = ma[mi],
 				    toIdx = ma[mi + 1],
 				    to = ma[mi + 3],
@@ -1017,10 +1017,10 @@
 					while (0 < this.count && black | white) {
 						if (this.player !== 16) black &= this.check;else white &= this.check;
 						if (this.hash1 === hash1 && --i === 0) break;
-						this.unmove();
+						this.undoMove();
 					}
 
-					while (_history[this.count]) this.move(_history[this.count]);
+					while (_history[this.count]) this.doMove(_history[this.count]);
 
 					if (i === 0 && black | white) {
 						return {
@@ -1157,9 +1157,9 @@
 		for (var i = mi; i < mi2; i += 5) {
 			if ((moveArray[i + 4] & 15) === 8) return 65534;
 
-			position.move_(moveArray, i);
+			position.doMoveFast(moveArray, i);
 			var score = -search(position, depth - 1, -beta, -alpha, mi2);
-			position.unmove_(moveArray, i);
+			position.undoMoveFast(moveArray, i);
 
 			if (alpha < score) {
 				alpha = score;
@@ -1178,9 +1178,9 @@
 		for (var i = 0; i < mi; i += 5) {
 			if ((moveArray[i + 4] & 15) === 8) return "check mated";
 
-			position.move_(moveArray, i);
+			position.doMoveFast(moveArray, i);
 			var score = -search(position, depth - 1, -65535, -alpha, mi);
-			position.unmove_(moveArray, i);
+			position.undoMoveFast(moveArray, i);
 
 			if (alpha < score) {
 				bestMove = i;

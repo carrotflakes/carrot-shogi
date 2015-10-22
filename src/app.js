@@ -78,8 +78,8 @@ var appVm = new Vue({
 				return;
 
 			this.selectedPiece = null;
-			position.unmove();
-			position.unmove();
+			position.undoMove();
+			position.undoMove();
 			this.promotionSelect.show = false;
 			this.draw();
 		},
@@ -158,7 +158,7 @@ var appVm = new Vue({
 		},
 		move_(fromIdx, toIdx, promote) {
 			if (fromIdx & 0b10000000) {
-				position.move({
+				position.doMove({
 					fromIdx,
 					toIdx,
 					from: 0,
@@ -167,7 +167,7 @@ var appVm = new Vue({
 				});
 			} else {
 				let from = position.board[fromIdx];
-				position.move({
+				position.doMove({
 					fromIdx,
 					toIdx,
 					from: from,
@@ -199,7 +199,7 @@ var appVm = new Vue({
 				this.gameResult = "あなたの勝ちです";
 				return;
 			}
-			position.move(move);
+			position.doMove(move);
 
 			this.promotionSelect.show = false;
 			this.draw();

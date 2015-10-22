@@ -394,7 +394,7 @@ export default class Position {
 		return mi;
 	}
 
-	move(move) {
+	doMove(move) {
 		const fromIdx = move.fromIdx,
 		toIdx = move.toIdx,
 		to = move.to,
@@ -437,7 +437,7 @@ export default class Position {
 		this.check = this.isCheck();
 	}
 
-	unmove() {
+	undoMove() {
 		const move = this.history.pop(),
 		fromIdx = move.fromIdx,
 		toIdx = move.toIdx,
@@ -482,7 +482,7 @@ export default class Position {
 		this.check = this.isCheck();
 	}
 
-	move_(ma, mi) {
+	doMoveFast(ma, mi) {
 		const fromIdx = ma[mi],
 		toIdx = ma[mi+1],
 		to = ma[mi+3],
@@ -522,7 +522,7 @@ export default class Position {
 		this.player = player ^ 0b110000;
 	}
 
-	unmove_(ma, mi) {
+	undoMoveFast(ma, mi) {
 		const fromIdx = ma[mi],
 		toIdx = ma[mi+1],
 		to = ma[mi+3],
@@ -594,11 +594,11 @@ export default class Position {
 					white &= this.check;
 				if (this.hash1 === hash1 && --i === 0)
 					break;
-				this.unmove();
+				this.undoMove();
 			}
 
 			while (history[this.count])
-				this.move(history[this.count]);
+				this.doMove(history[this.count]);
 
 			if (i === 0 && black | white) {
 				return {

@@ -84,9 +84,9 @@ function search(position, depth, alpha, beta, mi) {
 		if ((moveArray[i+4] & 0b1111) === 0b1000)
 			return 65534;
 
-		position.move_(moveArray, i);
+		position.doMoveFast(moveArray, i);
 		let score = -search(position, depth-1, -beta, -alpha, mi2);
-		position.unmove_(moveArray, i);
+		position.undoMoveFast(moveArray, i);
 
 		if (alpha < score) {
 			alpha = score;
@@ -108,9 +108,9 @@ export default function ai(position, depth) {
 		if ((moveArray[i+4] & 0b1111) === 0b1000)
 			return "check mated";
 
-		position.move_(moveArray, i);
+		position.doMoveFast(moveArray, i);
 		let score = -search(position, depth-1, -65535, -alpha, mi);
-		position.unmove_(moveArray, i);
+		position.undoMoveFast(moveArray, i);
 
 		if (alpha < score) {
 			bestMove = i;
