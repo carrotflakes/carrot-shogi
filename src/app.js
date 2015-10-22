@@ -42,24 +42,24 @@ var appVm = new Vue({
 		lastMoveIndex: 0,
 		gameMode: null,
 		gameResult: null,
-		unpromotedPiece: {
-			label: "歩兵",
-			x: -31,
-			y: 31,
-			black: true,
-		},
-		promotedPiece: {
-			label: "と金",
-			x: 31,
-			y: 31,
-			black: true,
-		},
 		promotionSelect: {
 			show: false,
 			x: 0,
 			y: 0,
 			fromIdx: 0,
 			toIdx: 0,
+			unpromotedPiece: {
+				label: "歩兵",
+				x: -31,
+				y: 31,
+				black: true,
+			},
+			promotedPiece: {
+				label: "と金",
+				x: 31,
+				y: 31,
+				black: true,
+			},
 		},
 		sound: true,
 		enableDebug: false,
@@ -145,10 +145,10 @@ var appVm = new Vue({
 				this.move_(fromIdx, toIdx, true);
 				break;
 			case 3:
-				this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b111];
-				this.unpromotedPiece.black = !!(position.player & 0b010000),
-				this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b111 | 0b1000];
-				this.promotedPiece.black = !!(position.player & 0b010000),
+				this.promotionSelect.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 0b111];
+				this.promotionSelect.unpromotedPiece.black = position.player === 0b010000,
+				this.promotionSelect.promotedPiece.label   = LABEL_TABLE[position.board[fromIdx] & 0b111 | 0b1000];
+				this.promotionSelect.promotedPiece.black   = position.player === 0b010000,
 				this.promotionSelect.show = true;
 				this.promotionSelect.fromIdx = fromIdx;
 				this.promotionSelect.toIdx = toIdx;

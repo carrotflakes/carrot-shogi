@@ -106,24 +106,24 @@
 			lastMoveIndex: 0,
 			gameMode: null,
 			gameResult: null,
-			unpromotedPiece: {
-				label: "歩兵",
-				x: -31,
-				y: 31,
-				black: true
-			},
-			promotedPiece: {
-				label: "と金",
-				x: 31,
-				y: 31,
-				black: true
-			},
 			promotionSelect: {
 				show: false,
 				x: 0,
 				y: 0,
 				fromIdx: 0,
-				toIdx: 0
+				toIdx: 0,
+				unpromotedPiece: {
+					label: "歩兵",
+					x: -31,
+					y: 31,
+					black: true
+				},
+				promotedPiece: {
+					label: "と金",
+					x: 31,
+					y: 31,
+					black: true
+				}
 			},
 			sound: true,
 			enableDebug: false,
@@ -207,9 +207,9 @@
 						this.move_(fromIdx, toIdx, true);
 						break;
 					case 3:
-						this.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7];
-						this.unpromotedPiece.black = !!(position.player & 16), this.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7 | 8];
-						this.promotedPiece.black = !!(position.player & 16), this.promotionSelect.show = true;
+						this.promotionSelect.unpromotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7];
+						this.promotionSelect.unpromotedPiece.black = position.player === 16, this.promotionSelect.promotedPiece.label = LABEL_TABLE[position.board[fromIdx] & 7 | 8];
+						this.promotionSelect.promotedPiece.black = position.player === 16, this.promotionSelect.show = true;
 						this.promotionSelect.fromIdx = fromIdx;
 						this.promotionSelect.toIdx = toIdx;
 						this.promotionSelect.x = 102 + 41 * ((toIdx - 11) % 10) + 20;

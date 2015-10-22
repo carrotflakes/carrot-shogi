@@ -117,9 +117,9 @@ font-weight: bold;
 			 v-attr="transform: 'translate(' + promotionSelect.x + ', ' + promotionSelect.y + ')'">
 			<rect fill="rgba(247,247,247,0.6)" stroke="#F7F7F7" stroke-width="2"
 						x="-57" y="0" width="114" height="62" />
-			<piece $data="{{unpromotedPiece}}"
+			<piece $data="{{promotionSelect.unpromotedPiece}}"
 						 on-click="{{selectUnpromote}}"></piece>
-			<piece $data="{{promotedPiece}}"
+			<piece $data="{{promotionSelect.promotedPiece}}"
 						 on-click="{{selectPromote}}"></piece>
 		</g>
 
