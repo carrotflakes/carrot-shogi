@@ -187,7 +187,7 @@ var appVm = new Vue({
 				return;
 			}
 
-			this.sound && sound[position.check ? "pipo" : "pi"]();
+			this.sound && sound[position.check ? "check" : "move"]();
 
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
 				window.setTimeout(() => this.moveByAI(), 100);
@@ -216,7 +216,7 @@ var appVm = new Vue({
 				return;
 			}
 
-			this.sound && sound[position.check ? "pipo" : "pi"]();
+			this.sound && sound[position.check ? "check" : "move"]();
 		},
 		gameEnd(winner, message) {
 			if (winner === null) {
@@ -234,7 +234,7 @@ var appVm = new Vue({
 					break;
 				}
 			}
-			this.sound && sound.pipu();
+			this.sound && sound.gameEnd();
 		},
 		gameStart(mode) {
 			if (["sente", "gote", "free"].indexOf(mode) === -1)
@@ -246,7 +246,7 @@ var appVm = new Vue({
 			this.promotionSelect.show = false;
 			this.gameResult = null;
 			this.draw();
-			this.sound && sound.pirori();
+			this.sound && sound.gameStart();
 
 			if (this.gameMode === "gote") {
 				position.player ^= 0b110000;

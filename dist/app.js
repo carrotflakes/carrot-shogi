@@ -249,7 +249,7 @@
 					return;
 				}
 
-				this.sound && sound[position.check ? "pipo" : "pi"]();
+				this.sound && sound[position.check ? "check" : "move"]();
 
 				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 32) window.setTimeout(function () {
 					return _this.moveByAI();
@@ -278,7 +278,7 @@
 					return;
 				}
 
-				this.sound && sound[position.check ? "pipo" : "pi"]();
+				this.sound && sound[position.check ? "check" : "move"]();
 			},
 			gameEnd: function gameEnd(winner, message) {
 				if (winner === null) {
@@ -296,7 +296,7 @@
 							break;
 					}
 				}
-				this.sound && sound.pipu();
+				this.sound && sound.gameEnd();
 			},
 			gameStart: function gameStart(mode) {
 				var _this2 = this;
@@ -309,7 +309,7 @@
 				this.promotionSelect.show = false;
 				this.gameResult = null;
 				this.draw();
-				this.sound && sound.pirori();
+				this.sound && sound.gameStart();
 
 				if (this.gameMode === "gote") {
 					position.player ^= 48;
@@ -1219,10 +1219,11 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.pirori = pirori;
-	exports.pi = pi;
+	exports.gameStart = gameStart;
+	exports.move = move;
 	exports.pipu = pipu;
-	exports.pipo = pipo;
+	exports.check = check;
+	exports.gameEnd = gameEnd;
 
 	var context = null;
 	var AVAILABLE = false;
@@ -1238,7 +1239,7 @@
 		exports.AVAILABLE = AVAILABLE = true;
 	}
 
-	function pirori() {
+	function gameStart() {
 		if (context === null) return;
 
 		var time = context.currentTime + 0.01;
@@ -1247,12 +1248,13 @@
 		osc.frequency.value = 440;
 		osc.connect(gain);
 		osc.start(time);
-		osc.frequency.setValueAtTime(440 * 5 / 4, time + 0.1);
+		//osc.frequency.setValueAtTime(440 * 5 / 4, time + 0.1);
+		osc.frequency.setValueAtTime(440 * 4 / 3, time + 0.1);
 		osc.frequency.setValueAtTime(440 * 3 / 2, time + 0.2);
 		osc.stop(time + 0.3);
 	}
 
-	function pi() {
+	function move() {
 		if (context === null) return;
 
 		var time = context.currentTime + 0.01;
@@ -1277,7 +1279,7 @@
 		osc.stop(time + 0.2);
 	}
 
-	function pipo() {
+	function check() {
 		if (context === null) return;
 
 		var time = context.currentTime + 0.01;
@@ -1288,6 +1290,22 @@
 		osc.start(time);
 		osc.frequency.setValueAtTime(440 * 9 / 8, time + 0.1);
 		osc.stop(time + 0.2);
+	}
+
+	function gameEnd() {
+		if (context === null) return;
+
+		var time = context.currentTime + 0.01;
+		var osc = context.createOscillator();
+		osc.type = "square";
+		osc.frequency.value = 440;
+		osc.connect(gain);
+		osc.start(time);
+		osc.frequency.setValueAtTime(440 * 4 / 3, time + 0.1);
+		osc.frequency.setValueAtTime(440 * 3 / 2, time + 0.2);
+		osc.frequency.setValueAtTime(440 * 9 / 5, time + 0.3);
+		osc.frequency.setValueAtTime(440 * 2, time + 0.4);
+		osc.stop(time + 0.6);
 	}
 
 /***/ },
