@@ -453,11 +453,12 @@
 				    fuUsed = 1 << 0;
 
 				for (var i = 11; i < 101; ++i) {
-					var sq = board[i],
-					    promotable = player === 16 ? i < 40 : 70 < i,
-					    j = undefined;
+					var sq = board[i];
 
 					if (!(sq & player)) continue;
+
+					var promotable = player === 16 ? i < 40 : 70 < i,
+					    j = undefined;
 					switch (sq & 15) {
 						case 8:
 							if (board[j = i - 11] === 0 || board[j] & opPlayer) {
@@ -1128,20 +1129,20 @@
 	var _positionJs2 = _interopRequireDefault(_positionJs);
 
 	var PIECE_SCORE_TABLE = new Uint16Array(16);
-	PIECE_SCORE_TABLE[1] = 50;
-	PIECE_SCORE_TABLE[2] = 45;
-	PIECE_SCORE_TABLE[3] = 30;
-	PIECE_SCORE_TABLE[4] = 27;
-	PIECE_SCORE_TABLE[5] = 18;
-	PIECE_SCORE_TABLE[6] = 16;
+	PIECE_SCORE_TABLE[1] = 65;
+	PIECE_SCORE_TABLE[2] = 58;
+	PIECE_SCORE_TABLE[3] = 47;
+	PIECE_SCORE_TABLE[4] = 39;
+	PIECE_SCORE_TABLE[5] = 25;
+	PIECE_SCORE_TABLE[6] = 23;
 	PIECE_SCORE_TABLE[7] = 10;
 	PIECE_SCORE_TABLE[8] = 500;
-	PIECE_SCORE_TABLE[9] = 70;
-	PIECE_SCORE_TABLE[10] = 65;
-	PIECE_SCORE_TABLE[12] = 30;
-	PIECE_SCORE_TABLE[13] = 30;
-	PIECE_SCORE_TABLE[14] = 30;
-	PIECE_SCORE_TABLE[15] = 30;
+	PIECE_SCORE_TABLE[9] = 95;
+	PIECE_SCORE_TABLE[10] = 84;
+	PIECE_SCORE_TABLE[12] = 45;
+	PIECE_SCORE_TABLE[13] = 45;
+	PIECE_SCORE_TABLE[14] = 45;
+	PIECE_SCORE_TABLE[15] = 46;
 
 	var MAX_SEARCH_DEPTH = 5;
 
@@ -1156,20 +1157,20 @@
 			var sq = board[i];
 			if (sq & 16) score += PIECE_SCORE_TABLE[sq & 15];else if (sq & 32) score -= PIECE_SCORE_TABLE[sq & 15];
 		}
-		score += bPieces[0] * 60;
-		score += bPieces[1] * 55;
-		score += bPieces[2] * 45;
-		score += bPieces[3] * 44;
-		score += bPieces[4] * 28;
-		score += bPieces[5] * 26;
-		score += bPieces[6] * 15;
-		score -= wPieces[0] * 60;
-		score -= wPieces[1] * 55;
-		score -= wPieces[2] * 45;
-		score -= wPieces[3] * 44;
-		score -= wPieces[4] * 28;
-		score -= wPieces[5] * 26;
-		score -= wPieces[6] * 15;
+		score += bPieces[0] * 70;
+		score += bPieces[1] * 62;
+		score += bPieces[2] * 54;
+		score += bPieces[3] * 50;
+		score += bPieces[4] * 27;
+		score += bPieces[5] * 25;
+		score += bPieces[6] * 12;
+		score -= wPieces[0] * 70;
+		score -= wPieces[1] * 62;
+		score -= wPieces[2] * 54;
+		score -= wPieces[3] * 50;
+		score -= wPieces[4] * 27;
+		score -= wPieces[5] * 25;
+		score -= wPieces[6] * 12;
 		return score;
 	}
 

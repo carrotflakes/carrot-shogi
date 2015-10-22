@@ -60,11 +60,11 @@ export default class Position {
 		fuUsed = 1 << 0;
 
 		for (let i = 11; i < 101; ++i) {
-			let sq = board[i],
-			promotable = player === 0b010000 ? i < 40 : 70 < i,
-			j;
+			let sq = board[i];
 
 			if (!(sq & player)) continue;
+
+			let promotable = player === 0b010000 ? i < 40 : 70 < i, j;
 			switch(sq & 0b1111) {
 			case 0b1000:
 				if (board[j=i-11] === 0 || board[j] & opPlayer)

@@ -4,20 +4,20 @@ import Position from "./position.js";
 
 
 const PIECE_SCORE_TABLE = new Uint16Array(0b10000);
-PIECE_SCORE_TABLE[0b0001] = 50;
-PIECE_SCORE_TABLE[0b0010] = 45;
-PIECE_SCORE_TABLE[0b0011] = 30;
-PIECE_SCORE_TABLE[0b0100] = 27;
-PIECE_SCORE_TABLE[0b0101] = 18;
-PIECE_SCORE_TABLE[0b0110] = 16;
+PIECE_SCORE_TABLE[0b0001] = 65;
+PIECE_SCORE_TABLE[0b0010] = 58;
+PIECE_SCORE_TABLE[0b0011] = 47;
+PIECE_SCORE_TABLE[0b0100] = 39;
+PIECE_SCORE_TABLE[0b0101] = 25;
+PIECE_SCORE_TABLE[0b0110] = 23;
 PIECE_SCORE_TABLE[0b0111] = 10;
 PIECE_SCORE_TABLE[0b1000] = 500;
-PIECE_SCORE_TABLE[0b1001] = 70;
-PIECE_SCORE_TABLE[0b1010] = 65;
-PIECE_SCORE_TABLE[0b1100] = 30;
-PIECE_SCORE_TABLE[0b1101] = 30;
-PIECE_SCORE_TABLE[0b1110] = 30;
-PIECE_SCORE_TABLE[0b1111] = 30;
+PIECE_SCORE_TABLE[0b1001] = 95;
+PIECE_SCORE_TABLE[0b1010] = 84;
+PIECE_SCORE_TABLE[0b1100] = 45;
+PIECE_SCORE_TABLE[0b1101] = 45;
+PIECE_SCORE_TABLE[0b1110] = 45;
+PIECE_SCORE_TABLE[0b1111] = 46;
 
 const MAX_SEARCH_DEPTH = 5;
 
@@ -36,20 +36,20 @@ function evalPosition(position) {
 		else if (sq & 0b100000)
 			score -= PIECE_SCORE_TABLE[sq & 0b1111];
 	}
-	score += bPieces[0] * 60;
-	score += bPieces[1] * 55;
-	score += bPieces[2] * 45;
-	score += bPieces[3] * 44;
-	score += bPieces[4] * 28;
-	score += bPieces[5] * 26;
-	score += bPieces[6] * 15;
-	score -= wPieces[0] * 60;
-	score -= wPieces[1] * 55;
-	score -= wPieces[2] * 45;
-	score -= wPieces[3] * 44;
-	score -= wPieces[4] * 28;
-	score -= wPieces[5] * 26;
-	score -= wPieces[6] * 15;
+	score += bPieces[0] * 70;
+	score += bPieces[1] * 62;
+	score += bPieces[2] * 54;
+	score += bPieces[3] * 50;
+	score += bPieces[4] * 27;
+	score += bPieces[5] * 25;
+	score += bPieces[6] * 12;
+	score -= wPieces[0] * 70;
+	score -= wPieces[1] * 62;
+	score -= wPieces[2] * 54;
+	score -= wPieces[3] * 50;
+	score -= wPieces[4] * 27;
+	score -= wPieces[5] * 25;
+	score -= wPieces[6] * 12;
 	return score;
 }
 
