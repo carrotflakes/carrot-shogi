@@ -77,7 +77,7 @@ function search(position, depth, alpha, beta, mi) {
 	if (depth === 0)
 		return (position.player === 0b010000) ? evalPosition(position) : -evalPosition(position);
 
-	var mi2 = position.allMoves(moveArray, mi);
+	var mi2 = position.allMoves(moveArray, mi, depth === 1);
 	sortMoves(position, mi, mi2);
 
 	for (let i = mi; i < mi2; i += 5) {

@@ -53,11 +53,10 @@ export default class Position {
 			this.board[11 + 10 * 6 + i] = 0b010111;
 	}
 
-	allMoves(ma, mi) {
+	allMoves(ma, mi, exceptDrops) {
 		var board = this.board,
 		player = this.player,
 		opPlayer = player ^ 0b110000,
-		pieces = player === 0b010000 ? this.bPieces : this.wPieces,
 		fuUsed = 1 << 0;
 
 		for (let i = 11; i < 101; ++i) {
@@ -350,6 +349,10 @@ export default class Position {
 			}
 		}
 
+		if (exceptDrops)
+			return mi;
+
+		var pieces = player === 0b010000 ? this.bPieces : this.wPieces;
 		for (let i = 11; i < 101; ++i) {
 			if (board[i] !== 0) continue;
 			if (pieces[0])

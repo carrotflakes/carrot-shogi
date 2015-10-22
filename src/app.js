@@ -66,6 +66,8 @@ var appVm = new Vue({
 		debugInfo: {
 			hash1: null,
 			check: null,
+			thinkTime: null,
+			thinkScore: null,
 		},
 	},
 	methods: {
@@ -194,7 +196,11 @@ var appVm = new Vue({
 			if (this.gameMode === null)
 				return;
 
+			var startTime = new Date().getTime();
 			var move = ai(position, searchDepth);
+			this.debugInfo.thinkTime = new Date().getTime() - startTime;
+			this.debugInfo.thinkScore = move.score;
+
 			if (move === null) {
 				this.gameResult = "あなたの勝ちです";
 				return;

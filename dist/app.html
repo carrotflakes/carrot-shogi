@@ -161,6 +161,8 @@ font-weight: bold;
 	<div v-if="enableDebug" v-cloak style="font-size: 12px;">
 		Hash1: {{debugInfo.hash1 + ""}}<br>
 		Check: {{debugInfo.check + ""}}<br>
+		ThinkTime: {{debugInfo.thinkTime + " ms"}}<br>
+		ThinkScore: {{debugInfo.thinkScore}}<br>
 		<button v-on="click: gameMode = 'sente'">gameMode = sente</button>
 		<button v-on="click: gameMode = 'gote'">gameMode = gote</button>
 		<button v-on="click: gameMode = 'free'">gameMode = free</button>

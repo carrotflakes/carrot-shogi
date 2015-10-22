@@ -129,7 +129,9 @@
 			enableDebug: false,
 			debugInfo: {
 				hash1: null,
-				check: null
+				check: null,
+				thinkTime: null,
+				thinkScore: null
 			}
 		},
 		methods: {
@@ -256,7 +258,11 @@
 			moveByAI: function moveByAI() {
 				if (this.gameMode === null) return;
 
+				var startTime = new Date().getTime();
 				var move = (0, _aiJs2["default"])(position, searchDepth);
+				this.debugInfo.thinkTime = new Date().getTime() - startTime;
+				this.debugInfo.thinkScore = move.score;
+
 				if (move === null) {
 					this.gameResult = "あなたの勝ちです";
 					return;
@@ -442,11 +448,10 @@
 
 		_createClass(Position, [{
 			key: "allMoves",
-			value: function allMoves(ma, mi) {
+			value: function allMoves(ma, mi, exceptDrops) {
 				var board = this.board,
 				    player = this.player,
 				    opPlayer = player ^ 48,
-				    pieces = player === 16 ? this.bPieces : this.wPieces,
 				    fuUsed = 1 << 0;
 
 				for (var i = 11; i < 101; ++i) {
@@ -805,6 +810,9 @@
 					}
 				}
 
+				if (exceptDrops) return mi;
+
+				var pieces = player === 16 ? this.bPieces : this.wPieces;
 				for (var i = 11; i < 101; ++i) {
 					if (board[i] !== 0) continue;
 					if (pieces[0]) {
@@ -1151,7 +1159,7 @@
 	function search(position, depth, alpha, beta, mi) {
 		if (depth === 0) return position.player === 16 ? evalPosition(position) : -evalPosition(position);
 
-		var mi2 = position.allMoves(moveArray, mi);
+		var mi2 = position.allMoves(moveArray, mi, depth === 1);
 		sortMoves(position, mi, mi2);
 
 		for (var i = mi; i < mi2; i += 5) {
