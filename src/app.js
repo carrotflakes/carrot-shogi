@@ -185,7 +185,7 @@ var appVm = new Vue({
 				return;
 			}
 
-			this.sound && sound.pi();
+			this.sound && sound[position.check ? "pipo" : "pi"]();
 
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
 				window.setTimeout(() => this.moveByAI(), 100);
@@ -210,7 +210,7 @@ var appVm = new Vue({
 				return;
 			}
 
-			this.sound && sound.pi();
+			this.sound && sound[position.check ? "pipo" : "pi"]();
 		},
 		gameEnd(winner, message) {
 			if (winner === null) {

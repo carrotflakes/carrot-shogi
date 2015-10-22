@@ -247,7 +247,7 @@
 					return;
 				}
 
-				this.sound && sound.pi();
+				this.sound && sound[position.check ? "pipo" : "pi"]();
 
 				if (this.gameMode === "sente" | this.gameMode === "gote" && position.player === 32) window.setTimeout(function () {
 					return _this.moveByAI();
@@ -272,7 +272,7 @@
 					return;
 				}
 
-				this.sound && sound.pi();
+				this.sound && sound[position.check ? "pipo" : "pi"]();
 			},
 			gameEnd: function gameEnd(winner, message) {
 				if (winner === null) {
@@ -1214,6 +1214,7 @@
 	exports.pirori = pirori;
 	exports.pi = pi;
 	exports.pipu = pipu;
+	exports.pipo = pipo;
 
 	var context = null;
 	var AVAILABLE = false;
@@ -1232,21 +1233,21 @@
 	function pirori() {
 		if (context === null) return;
 
-		var time = context.currentTime + 0.05;
+		var time = context.currentTime + 0.01;
 		var osc = context.createOscillator();
 		osc.type = "square";
 		osc.frequency.value = 440;
 		osc.connect(gain);
 		osc.start(time);
-		osc.frequency.setValueAtTime(550, time + 0.1);
-		osc.frequency.setValueAtTime(660, time + 0.2);
+		osc.frequency.setValueAtTime(440 * 5 / 4, time + 0.1);
+		osc.frequency.setValueAtTime(440 * 3 / 2, time + 0.2);
 		osc.stop(time + 0.3);
 	}
 
 	function pi() {
 		if (context === null) return;
 
-		var time = context.currentTime + 0.05;
+		var time = context.currentTime + 0.01;
 		var osc = context.createOscillator();
 		osc.type = "square";
 		osc.frequency.value = 440;
@@ -1258,13 +1259,26 @@
 	function pipu() {
 		if (context === null) return;
 
-		var time = context.currentTime + 0.05;
+		var time = context.currentTime + 0.01;
 		var osc = context.createOscillator();
 		osc.type = "square";
 		osc.frequency.value = 440;
 		osc.connect(gain);
 		osc.start(time);
 		osc.frequency.setValueAtTime(220, time + 0.1);
+		osc.stop(time + 0.2);
+	}
+
+	function pipo() {
+		if (context === null) return;
+
+		var time = context.currentTime + 0.01;
+		var osc = context.createOscillator();
+		osc.type = "square";
+		osc.frequency.value = 440 * 45 / 32;
+		osc.connect(gain);
+		osc.start(time);
+		osc.frequency.setValueAtTime(440 * 9 / 8, time + 0.1);
 		osc.stop(time + 0.2);
 	}
 
