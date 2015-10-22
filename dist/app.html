@@ -163,11 +163,11 @@ font-weight: bold;
 		Check: {{debugInfo.check + ""}}<br>
 		ThinkTime: {{debugInfo.thinkTime + " ms"}}<br>
 		ThinkScore: {{debugInfo.thinkScore}}<br>
+		<button v-on="click: moveByAI()">AI</button>
 		<button v-on="click: gameMode = 'sente'">gameMode = sente</button>
 		<button v-on="click: gameMode = 'gote'">gameMode = gote</button>
 		<button v-on="click: gameMode = 'free'">gameMode = free</button>
 		<button v-on="click: gameResult = null">gameResult = null</button>
-		<!--button v-on="click: setPosition(0)">連続王手の千日手局面</button-->
 	</div>
 </div>
 

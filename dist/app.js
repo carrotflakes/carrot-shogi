@@ -264,7 +264,7 @@
 				this.debugInfo.thinkScore = move.score;
 
 				if (move === null) {
-					this.gameResult = "あなたの勝ちです";
+					this.gameResult = "あなたの勝ちです?";
 					return;
 				}
 				position.doMove(move);
@@ -286,10 +286,8 @@
 				} else {
 					switch (this.gameMode) {
 						case "sente":
-							this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
-							break;
 						case "gote":
-							this.gameResult = (winner === "white" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+							this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 							break;
 						case "free":
 							this.gameResult = (winner === "black" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
@@ -1007,10 +1005,32 @@
 		}, {
 			key: "isIgnoreCheck",
 			value: function isIgnoreCheck() {
-				var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
-				    mi = this.allMoves(moveArray, 0);
-				for (var i = 0; i < mi; i += 5) if ((moveArray[i + 4] & 15) === 8) return true;;
-				return false;
+				var mi = this.allMoves(moveArray, 0, true);
+				for (var i = 0; i < mi; i += 5) {
+					if ((moveArray[i + 4] & 15) === 8) return true;
+				}return false;
+			}
+		}, {
+			key: "isCheckMate",
+			value: function isCheckMate() {
+				var mi1 = this.allMoves(moveArray, 0);
+				for (var i = 0; i < mi1; i += 5) {
+					this.doMoveFast(moveArray, i);
+
+					var mi2 = this.allMoves(moveArray, mi1, true),
+					    flg = false;
+					for (var j = mi1; j < mi2; j += 5) {
+						if ((moveArray[j + 4] & 15) === 8) {
+							flg = true;
+							break;
+						}
+					}
+
+					this.undoMoveFast(moveArray, i);
+
+					if (!flg) return false;
+				}
+				return true;
 			}
 		}, {
 			key: "judge",
@@ -1042,10 +1062,17 @@
 					};
 				}
 
+				if (this.isCheckMate()) {
+					return {
+						winner: this.player !== 16 ? "black" : "white",
+						reason: null
+					};
+				}
+
 				if (this.isIgnoreCheck()) {
 					return {
 						winner: this.player === 16 ? "black" : "white",
-						reason: null
+						reason: "王手放置"
 					};
 				}
 
@@ -1054,8 +1081,7 @@
 		}, {
 			key: "canMove",
 			value: function canMove(fromIdx, toIdx) {
-				var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
-				    mi = this.allMoves(moveArray, 0),
+				var mi = this.allMoves(moveArray, 0),
 				    result = 0;
 				for (var i = 0; i < mi; i += 5) if (moveArray[i] === fromIdx && moveArray[i + 1] === toIdx) result |= moveArray[i + 2] === moveArray[i + 3] ? 1 : 2;
 				return result;
@@ -1071,6 +1097,8 @@
 	})();
 
 	exports["default"] = Position;
+
+	var moveArray = new Uint8Array(2 * Position.MAX_MOVES_NUM_IN_A_POSITION * 5);
 
 	module.exports = Position;
 	module.exports = exports["default"];
@@ -1156,14 +1184,14 @@
 		}
 	}
 
-	function search(position, depth, alpha, beta, mi) {
+	function search(position, depth, alpha, beta, mi1) {
 		if (depth === 0) return position.player === 16 ? evalPosition(position) : -evalPosition(position);
 
-		var mi2 = position.allMoves(moveArray, mi, depth === 1);
-		sortMoves(position, mi, mi2);
+		var mi2 = position.allMoves(moveArray, mi1, depth === 1);
+		sortMoves(position, mi1, mi2);
 
-		for (var i = mi; i < mi2; i += 5) {
-			if ((moveArray[i + 4] & 15) === 8) return 65534;
+		for (var i = mi1; i < mi2; i += 5) {
+			if ((moveArray[i + 4] & 15) === 8) return 65000 + depth;
 
 			position.doMoveFast(moveArray, i);
 			var score = -search(position, depth - 1, -beta, -alpha, mi2);

@@ -575,12 +575,33 @@ export default class Position {
 	}
 
 	isIgnoreCheck() {
-		var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
-		mi = this.allMoves(moveArray, 0);
-		for (var i = 0; i < mi; i += 5)
+		var mi = this.allMoves(moveArray, 0, true);
+		for (let i = 0; i < mi; i += 5)
 			if ((moveArray[i+4] & 0b1111) === 0b1000)
-				return true;;
+				return true;
 		return false;
+	}
+
+	isCheckMate() {
+		var mi1 = this.allMoves(moveArray, 0);
+		for (let i = 0; i < mi1; i += 5) {
+			this.doMoveFast(moveArray, i);
+
+			let mi2 = this.allMoves(moveArray, mi1, true),
+			flg = false;
+			for (let j = mi1; j < mi2; j += 5) {
+				if ((moveArray[j+4] & 0b1111) === 0b1000) {
+					flg = true;
+					break;
+				}
+			}
+
+			this.undoMoveFast(moveArray, i);
+
+			if (!flg)
+				return false;
+		}
+		return true;
 	}
 
 	judge() {
@@ -615,10 +636,17 @@ export default class Position {
 			};
 		}
 
+		if (this.isCheckMate()) {
+			return {
+				winner: this.player !== 0b010000 ? "black" : "white",
+				reason: null,
+			};
+		}
+
 		if (this.isIgnoreCheck()) {
 			return {
 				winner: this.player === 0b010000 ? "black" : "white",
-				reason: null,
+				reason: "王手放置",
 			};
 		}
 
@@ -626,8 +654,7 @@ export default class Position {
 	}
 
 	canMove(fromIdx, toIdx) {
-		var moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * 5),
-		mi = this.allMoves(moveArray, 0),
+		var mi = this.allMoves(moveArray, 0),
 		result = 0;
 		for (var i = 0; i < mi; i += 5)
 			if (moveArray[i] === fromIdx && moveArray[i+1] === toIdx)
@@ -641,5 +668,6 @@ export default class Position {
 
 }
 
+const moveArray = new Uint8Array(2 * Position.MAX_MOVES_NUM_IN_A_POSITION * 5);
 
 module.exports = Position;

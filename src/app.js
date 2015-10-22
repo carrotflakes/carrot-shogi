@@ -202,7 +202,7 @@ var appVm = new Vue({
 			this.debugInfo.thinkScore = move.score;
 
 			if (move === null) {
-				this.gameResult = "あなたの勝ちです";
+				this.gameResult = "あなたの勝ちです?";
 				return;
 			}
 			position.doMove(move);
@@ -224,10 +224,8 @@ var appVm = new Vue({
 			} else {
 				switch (this.gameMode) {
 				case "sente":
-					this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
-					break;
 				case "gote":
-					this.gameResult = (winner === "white" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+					this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 					break;
 				case "free":
 					this.gameResult = (winner === "black" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;

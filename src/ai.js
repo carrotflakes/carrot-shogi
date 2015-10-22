@@ -73,16 +73,16 @@ function sortMoves(position, mi1, mi2) {
 }
 
 
-function search(position, depth, alpha, beta, mi) {
+function search(position, depth, alpha, beta, mi1) {
 	if (depth === 0)
 		return (position.player === 0b010000) ? evalPosition(position) : -evalPosition(position);
 
-	var mi2 = position.allMoves(moveArray, mi, depth === 1);
-	sortMoves(position, mi, mi2);
+	var mi2 = position.allMoves(moveArray, mi1, depth === 1);
+	sortMoves(position, mi1, mi2);
 
-	for (let i = mi; i < mi2; i += 5) {
+	for (let i = mi1; i < mi2; i += 5) {
 		if ((moveArray[i+4] & 0b1111) === 0b1000)
-			return 65534;
+			return 65000 + depth;
 
 		position.doMoveFast(moveArray, i);
 		let score = -search(position, depth-1, -beta, -alpha, mi2);
