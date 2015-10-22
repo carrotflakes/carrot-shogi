@@ -138,7 +138,7 @@
 				this.gameResult = null;
 			},
 			matta: function matta() {
-				if (this.gameMode === null || this.gameResult !== null || position.history.length < 2) return;
+				if (this.gameMode === null || this.gameResult !== null || position.count < 2) return;
 
 				this.selectedPiece = null;
 				position.unmove();
@@ -188,8 +188,7 @@
 				}
 				this.pieces = newPieces;
 
-				var hl = position.history.length;
-				this.lastMoveIndex = hl > 0 ? position.history[hl - 1].toIdx : 0;
+				this.lastMoveIndex = position.count > 0 ? position.history[position.count - 1].toIdx : 0;
 
 				this.debugInfo.hash1 = (new Array(32 + 1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32);
 				this.debugInfo.check = position.check;
@@ -242,11 +241,9 @@
 				this.draw();
 				this.selectedPiece = null;
 
-				if (position.isSennichite()) {
-					this.gameEnd(null, "千日手");
-					return;
-				} else if (position.isIgnoreCheck()) {
-					this.gameEnd(position.player === 16 ? "shimote" : "kamite", "");
+				var judgeResult = position.judge();
+				if (judgeResult) {
+					this.gameEnd(judgeResult.winner, judgeResult.reason || "");
 					return;
 				}
 
@@ -269,11 +266,9 @@
 				this.promotionSelect.show = false;
 				this.draw();
 
-				if (position.isSennichite()) {
-					this.gameEnd(null, "千日手");
-					return;
-				} else if (position.isIgnoreCheck()) {
-					this.gameEnd(position.player === 16 ? "shimote" : "kamite", "");
+				var judgeResult = position.judge();
+				if (judgeResult) {
+					this.gameEnd(judgeResult.winner, judgeResult.reason || "");
 					return;
 				}
 
@@ -285,13 +280,13 @@
 				} else {
 					switch (this.gameMode) {
 						case "sente":
-							this.gameResult = (winner === "shimote" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+							this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 							break;
 						case "gote":
-							this.gameResult = (winner === "kamite" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+							this.gameResult = (winner === "white" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 							break;
 						case "free":
-							this.gameResult = (winner === "shimote" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
+							this.gameResult = (winner === "black" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
 							break;
 					}
 				}
@@ -406,7 +401,6 @@
 			this.hash1 = 0;
 			this.history = [];
 			this.hash1Counts = {};
-			this.checkHistory = [];
 			this.check = false;
 
 			for (var i = 0; i < 10; ++i) {
@@ -895,7 +889,6 @@
 				}
 				this.player = player ^ 48;
 				this.history.push(_move);
-				this.checkHistory.push(this.check);
 				this.check = this.isCheck();
 			}
 		}, {
@@ -907,7 +900,6 @@
 				    to = move.to,
 				    board = this.board,
 				    player = this.player ^= 48;
-				this.check = this.checkHistory.pop();
 
 				if (fromIdx & 128) {
 					board[toIdx] = 0;
@@ -932,6 +924,7 @@
 					}
 				}
 				this.hash1Counts[this.hash1] -= 1;
+				this.check = this.isCheck();
 			}
 		}, {
 			key: "move_",
@@ -1012,9 +1005,43 @@
 				return false;
 			}
 		}, {
-			key: "isSennichite",
-			value: function isSennichite() {
-				return this.hash1Counts[this.hash1] === 3;
+			key: "judge",
+			value: function judge() {
+				if (this.hash1Counts[this.hash1] === 3) {
+					var hash1 = this.hash1,
+					    _history = this.history.concat(),
+					    i = 4,
+					    black = true,
+					    white = true;
+
+					while (0 < this.count && black | white) {
+						if (this.player !== 16) black &= this.check;else white &= this.check;
+						if (this.hash1 === hash1 && --i === 0) break;
+						this.unmove();
+					}
+
+					while (_history[this.count]) this.move(_history[this.count]);
+
+					if (i === 0 && black | white) {
+						return {
+							winner: black ? "white" : "black",
+							reason: "連続王手の千日手"
+						};
+					}
+					return {
+						winner: null,
+						reason: "千日手"
+					};
+				}
+
+				if (this.isIgnoreCheck()) {
+					return {
+						winner: this.player === 16 ? "black" : "white",
+						reason: null
+					};
+				}
+
+				return null;
 			}
 		}, {
 			key: "canMove",
@@ -1024,6 +1051,11 @@
 				    result = 0;
 				for (var i = 0; i < mi; i += 5) if (moveArray[i] === fromIdx && moveArray[i + 1] === toIdx) result |= moveArray[i + 2] === moveArray[i + 3] ? 1 : 2;
 				return result;
+			}
+		}, {
+			key: "count",
+			get: function get() {
+				return this.history.length;
 			}
 		}]);
 

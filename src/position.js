@@ -14,7 +14,6 @@ export default class Position {
 		this.hash1 = 0;
 		this.history = [];
 		this.hash1Counts = {};
-		this.checkHistory = [];
 		this.check = false;
 
 		for (let i = 0; i < 10; ++i) {
@@ -435,7 +434,6 @@ export default class Position {
 		}
 		this.player = player ^ 0b110000;
 		this.history.push(move);
-		this.checkHistory.push(this.check);
 		this.check = this.isCheck();
 	}
 
@@ -446,7 +444,6 @@ export default class Position {
 		to = move.to,
 		board = this.board,
 		player = this.player ^= 0b110000;
-		this.check = this.checkHistory.pop();
 
 		if (fromIdx & 0b10000000) {
 			board[toIdx] = 0b000000;
@@ -482,6 +479,7 @@ export default class Position {
 			}
 		}
 		this.hash1Counts[this.hash1] -= 1;
+		this.check = this.isCheck();
 	}
 
 	move_(ma, mi) {
@@ -582,8 +580,46 @@ export default class Position {
 		return false;
 	}
 
-	isSennichite() {
-		return this.hash1Counts[this.hash1] === 3;
+	judge() {
+		if (this.hash1Counts[this.hash1] === 3) {
+			let hash1 = this.hash1,
+			history = this.history.concat(),
+			i = 4,
+			black = true, white = true;
+
+			while (0 < this.count && black | white) {
+				if (this.player !== 0b010000)
+					black &= this.check;
+				else
+					white &= this.check;
+				if (this.hash1 === hash1 && --i === 0)
+					break;
+				this.unmove();
+			}
+
+			while (history[this.count])
+				this.move(history[this.count]);
+
+			if (i === 0 && black | white) {
+				return {
+					winner: black ? "white" : "black",
+					reason: "連続王手の千日手",
+				};
+			}
+			return {
+				winner: null,
+				reason: "千日手",
+			};
+		}
+
+		if (this.isIgnoreCheck()) {
+			return {
+				winner: this.player === 0b010000 ? "black" : "white",
+				reason: null,
+			};
+		}
+
+		return null;
 	}
 
 	canMove(fromIdx, toIdx) {
@@ -594,6 +630,10 @@ export default class Position {
 			if (moveArray[i] === fromIdx && moveArray[i+1] === toIdx)
 				result |= (moveArray[i+2] === moveArray[i+3]) ? 1 : 2;
 		return result;
+	}
+
+	get count() {
+		return this.history.length;
 	}
 
 }

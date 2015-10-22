@@ -74,7 +74,7 @@ var appVm = new Vue({
 			this.gameResult = null;
 		},
 		matta() {
-			if (this.gameMode === null || this.gameResult !== null || position.history.length < 2)
+			if (this.gameMode === null || this.gameResult !== null || position.count < 2)
 				return;
 
 			this.selectedPiece = null;
@@ -125,8 +125,7 @@ var appVm = new Vue({
 			}
 			this.pieces = newPieces;
 
-			var hl = position.history.length;
-			this.lastMoveIndex = hl > 0 ? position.history[hl-1].toIdx : 0;
+			this.lastMoveIndex = position.count > 0 ? position.history[position.count - 1].toIdx : 0;
 
 			this.debugInfo.hash1 =
 				(new Array(32+1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32);
@@ -180,11 +179,9 @@ var appVm = new Vue({
 			this.draw();
 			this.selectedPiece = null;
 
-			if (position.isSennichite()) {
-				this.gameEnd(null, "千日手");
-				return;
-			} else if (position.isIgnoreCheck()) {
-				this.gameEnd(position.player === 0b010000 ? "shimote" : "kamite", "");
+			var judgeResult = position.judge();
+			if (judgeResult) {
+				this.gameEnd(judgeResult.winner, judgeResult.reason || "");
 				return;
 			}
 
@@ -207,11 +204,9 @@ var appVm = new Vue({
 			this.promotionSelect.show = false;
 			this.draw();
 
-			if (position.isSennichite()) {
-				this.gameEnd(null, "千日手");
-				return;
-			} else if (position.isIgnoreCheck()) {
-				this.gameEnd(position.player === 0b010000 ? "shimote" : "kamite", "");
+			var judgeResult = position.judge();
+			if (judgeResult) {
+				this.gameEnd(judgeResult.winner, judgeResult.reason || "");
 				return;
 			}
 
@@ -223,13 +218,13 @@ var appVm = new Vue({
 			} else {
 				switch (this.gameMode) {
 				case "sente":
-					this.gameResult = (winner === "shimote" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+					this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 					break;
 				case "gote":
-					this.gameResult = (winner === "kamite"  ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
+					this.gameResult = (winner === "white" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
 					break;
 				case "free":
-					this.gameResult = (winner === "shimote" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
+					this.gameResult = (winner === "black" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
 					break;
 				}
 			}
