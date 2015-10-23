@@ -58,15 +58,19 @@
 
 	var _positionJs2 = _interopRequireDefault(_positionJs);
 
-	var _aiJs = __webpack_require__(4);
+	var _aiJs = __webpack_require__(5);
 
 	var _aiJs2 = _interopRequireDefault(_aiJs);
 
-	var _soundJs = __webpack_require__(5);
+	var _bitsJs = __webpack_require__(4);
+
+	var bits = _interopRequireWildcard(_bitsJs);
+
+	var _soundJs = __webpack_require__(6);
 
 	var sound = _interopRequireWildcard(_soundJs);
 
-	var _componentsPieceVue = __webpack_require__(6);
+	var _componentsPieceVue = __webpack_require__(7);
 
 	var _componentsPieceVue2 = _interopRequireDefault(_componentsPieceVue);
 
@@ -128,7 +132,8 @@
 			sound: true,
 			enableDebug: false,
 			debugInfo: {
-				hash1: null,
+				hash32: null,
+				hash54: null,
 				check: null,
 				thinkTime: null,
 				thinkScore: null
@@ -192,7 +197,8 @@
 
 				this.lastMoveIndex = position.count > 0 ? position.history[position.count - 1].toIdx : 0;
 
-				this.debugInfo.hash1 = (new Array(32 + 1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2, 32) : position.hash1).toString(2)).slice(-32);
+				this.debugInfo.hash32 = bits.print32(position.hash32);
+				this.debugInfo.hash54 = bits.print54(position.hash54);
 				this.debugInfo.check = position.check;
 			},
 			move: function move(fromIdx, toIdx) {
@@ -375,7 +381,7 @@
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -385,7 +391,13 @@
 
 	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj["default"] = obj; return newObj; } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var _bitsJs = __webpack_require__(4);
+
+	var bits = _interopRequireWildcard(_bitsJs);
 
 	var Position = (function () {
 		_createClass(Position, null, [{
@@ -395,52 +407,71 @@
 			}
 		}]);
 
-		function Position() {
+		function Position(position) {
 			_classCallCheck(this, Position);
 
-			this.player = 16;
 			this.board = new Uint8Array(111);
 			this.bPieces = new Uint8Array(7);
 			this.wPieces = new Uint8Array(7);
-			this.hash1 = 0;
-			this.history = [];
-			this.hash1Counts = {};
-			this.check = false;
 
-			for (var i = 0; i < 10; ++i) {
-				this.board[i] = 64;
-				this.board[i * 10 + 10] = 64;
-				this.board[i + 101] = 64;
-			}
+			if (position instanceof Position) {
+				this.player = position.player;
+				this.hash32 = position.hash32;
+				this.hash54 = position.hash54;
+				this.history = position.history.concat();
+				this.hash32Counts = {};
+				this.check = position.check;
 
-			this.board[11 + 10 * 0 + 0] = 38;
-			this.board[11 + 10 * 0 + 1] = 37;
-			this.board[11 + 10 * 0 + 2] = 36;
-			this.board[11 + 10 * 0 + 3] = 35;
-			this.board[11 + 10 * 0 + 4] = 40;
-			this.board[11 + 10 * 0 + 5] = 35;
-			this.board[11 + 10 * 0 + 6] = 36;
-			this.board[11 + 10 * 0 + 7] = 37;
-			this.board[11 + 10 * 0 + 8] = 38;
-			this.board[11 + 10 * 1 + 1] = 33;
-			this.board[11 + 10 * 1 + 7] = 34;
+				for (var _i = 0; _i < 7; ++_i) {
+					this.bPieces[_i] = position.bPieces[_i], this.wPieces[_i] = position.wPieces[_i];
+				}for (var _i2 = 0; _i2 < 111; ++_i2) {
+					this.board[_i2] = position.board[_i2];
+				}for (var key in position.hash32Counts) {
+					this.hash32Counts[key] = position.hash32Counts[key];
+				}
+			} else {
+				this.player = 16;
+				this.hash32 = 0;
+				this.hash54 = 0;
+				this.history = [];
+				this.hash32Counts = {};
+				this.check = false;
 
-			for (var i = 0; i < 9; ++i) {
-				this.board[11 + 10 * 2 + i] = 39;
-			}this.board[11 + 10 * 8 + 0] = 22;
-			this.board[11 + 10 * 8 + 1] = 21;
-			this.board[11 + 10 * 8 + 2] = 20;
-			this.board[11 + 10 * 8 + 3] = 19;
-			this.board[11 + 10 * 8 + 4] = 24;
-			this.board[11 + 10 * 8 + 5] = 19;
-			this.board[11 + 10 * 8 + 6] = 20;
-			this.board[11 + 10 * 8 + 7] = 21;
-			this.board[11 + 10 * 8 + 8] = 22;
-			this.board[11 + 10 * 7 + 1] = 18;
-			this.board[11 + 10 * 7 + 7] = 17;
+				for (var _i3 = 0; _i3 < 10; ++_i3) {
+					this.board[_i3] = 64;
+					this.board[_i3 * 10 + 10] = 64;
+					this.board[_i3 + 101] = 64;
+				}
 
-			for (var i = 0; i < 9; ++i) {
-				this.board[11 + 10 * 6 + i] = 23;
+				this.board[11 + 10 * 0 + 0] = 38;
+				this.board[11 + 10 * 0 + 1] = 37;
+				this.board[11 + 10 * 0 + 2] = 36;
+				this.board[11 + 10 * 0 + 3] = 35;
+				this.board[11 + 10 * 0 + 4] = 40;
+				this.board[11 + 10 * 0 + 5] = 35;
+				this.board[11 + 10 * 0 + 6] = 36;
+				this.board[11 + 10 * 0 + 7] = 37;
+				this.board[11 + 10 * 0 + 8] = 38;
+				this.board[11 + 10 * 1 + 1] = 33;
+				this.board[11 + 10 * 1 + 7] = 34;
+
+				for (var _i4 = 0; _i4 < 9; ++_i4) {
+					this.board[11 + 10 * 2 + _i4] = 39;
+				}this.board[11 + 10 * 8 + 0] = 22;
+				this.board[11 + 10 * 8 + 1] = 21;
+				this.board[11 + 10 * 8 + 2] = 20;
+				this.board[11 + 10 * 8 + 3] = 19;
+				this.board[11 + 10 * 8 + 4] = 24;
+				this.board[11 + 10 * 8 + 5] = 19;
+				this.board[11 + 10 * 8 + 6] = 20;
+				this.board[11 + 10 * 8 + 7] = 21;
+				this.board[11 + 10 * 8 + 8] = 22;
+				this.board[11 + 10 * 7 + 1] = 18;
+				this.board[11 + 10 * 7 + 7] = 17;
+
+				for (var _i5 = 0; _i5 < 9; ++_i5) {
+					this.board[11 + 10 * 6 + _i5] = 23;
+				}
 			}
 		}
 
@@ -873,14 +904,16 @@
 				    to = move.to,
 				    board = this.board,
 				    player = this.player;
-				this.hash1Counts[this.hash1] = (this.hash1Counts[this.hash1] | 0) + 1;
+				this.hash32Counts[this.hash32] = (this.hash32Counts[this.hash32] | 0) + 1;
 
 				if (fromIdx & 128) {
 					board[toIdx] = to;
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 
-					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash32 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+
+					this.hash54 = bits.xor54(this.hash54, getHashSeed54(to, toIdx), getHandHashSeed54(to));
 				} else {
 					board[toIdx] = to;
 					board[fromIdx] = 0;
@@ -889,9 +922,13 @@
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 
-						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash32 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+
+						this.hash54 = bits.xor54(this.hash54, getHashSeed54(move.from, fromIdx), getHashSeed54(to, toIdx), getHashSeed54(capture, toIdx), getHandHashSeed54(capture));
 					} else {
-						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+						this.hash32 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+
+						this.hash54 = bits.xor54(this.hash54, getHashSeed54(move.from, fromIdx), getHashSeed54(to, toIdx));
 					}
 				}
 				this.player = player ^ 48;
@@ -913,7 +950,9 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 
-					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash32 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+
+					this.hash54 = bits.xor54(this.hash54, getHashSeed54(to, toIdx), getHandHashSeed54(to));
 				} else {
 					board[fromIdx] = move.from;
 
@@ -923,14 +962,18 @@
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 
-						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash32 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+
+						this.hash54 = bits.xor54(this.hash54, getHashSeed54(move.from, fromIdx), getHashSeed54(to, toIdx), getHashSeed54(capture, toIdx), getHandHashSeed54(capture));
 					} else {
 						board[toIdx] = 0;
 
-						this.hash1 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+						this.hash32 ^= move.from * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+
+						this.hash54 = bits.xor54(this.hash54, getHashSeed54(move.from, fromIdx), getHashSeed54(to, toIdx));
 					}
 				}
-				this.hash1Counts[this.hash1] -= 1;
+				this.hash32Counts[this.hash32] -= 1;
 				this.check = this.isCheck();
 			}
 		}, {
@@ -947,7 +990,7 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] -= 1;else this.wPieces[fromIdx & 127] -= 1;
 
-					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash32 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[toIdx] = to;
 					board[fromIdx] = 0;
@@ -956,9 +999,9 @@
 					if (capture) {
 						if (player === 16) this.bPieces[(capture & 7) - 1] += 1;else this.wPieces[(capture & 7) - 1] += 1;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash32 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
-						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+						this.hash32 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 				this.player = player ^ 48;
@@ -977,7 +1020,7 @@
 
 					if (player === 16) this.bPieces[fromIdx & 127] += 1;else this.wPieces[fromIdx & 127] += 1;
 
-					this.hash1 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
+					this.hash32 ^= to * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (to & 15) * (5591 << (player & 16));
 				} else {
 					board[fromIdx] = ma[mi + 2];
 
@@ -987,11 +1030,11 @@
 
 						if (player === 16) this.bPieces[(capture & 7) - 1] -= 1;else this.wPieces[(capture & 7) - 1] -= 1;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
+						this.hash32 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ ma[mi + 2] * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ capture * (222630977 + (9 << (toIdx & 15)) + toIdx) ^ (capture & 15) * (5591 << (player & 16));
 					} else {
 						board[toIdx] = 0;
 
-						this.hash1 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
+						this.hash32 ^= ma[mi + 2] * (222630977 + (9 << (fromIdx & 15)) + fromIdx) ^ to * (222630977 + (9 << (toIdx & 15)) + toIdx);
 					}
 				}
 			}
@@ -1007,16 +1050,16 @@
 			key: "isIgnoreCheck",
 			value: function isIgnoreCheck() {
 				var mi = this.allMoves(moveArray, 0, true);
-				for (var i = 0; i < mi; i += 5) {
-					if ((moveArray[i + 4] & 15) === 8) return true;
+				for (var _i6 = 0; _i6 < mi; _i6 += 5) {
+					if ((moveArray[_i6 + 4] & 15) === 8) return true;
 				}return false;
 			}
 		}, {
 			key: "isCheckMate",
 			value: function isCheckMate() {
 				var mi1 = this.allMoves(moveArray, 0);
-				for (var i = 0; i < mi1; i += 5) {
-					this.doMoveFast(moveArray, i);
+				for (var _i7 = 0; _i7 < mi1; _i7 += 5) {
+					this.doMoveFast(moveArray, _i7);
 
 					var mi2 = this.allMoves(moveArray, mi1, true),
 					    flg = false;
@@ -1027,7 +1070,7 @@
 						}
 					}
 
-					this.undoMoveFast(moveArray, i);
+					this.undoMoveFast(moveArray, _i7);
 
 					if (!flg) return false;
 				}
@@ -1036,22 +1079,22 @@
 		}, {
 			key: "judge",
 			value: function judge() {
-				if (this.hash1Counts[this.hash1] === 3) {
-					var hash1 = this.hash1,
+				if (this.hash32Counts[this.hash32] > 3) {
+					var hash54 = this.hash54,
 					    _history = this.history.concat(),
-					    i = 4,
+					    _i8 = 4,
 					    black = true,
 					    white = true;
 
 					while (0 < this.count && black | white) {
 						if (this.player !== 16) black &= this.check;else white &= this.check;
-						if (this.hash1 === hash1 && --i === 0) break;
+						if (this.hash54 === hash54 && --_i8 === 0) break;
 						this.undoMove();
 					}
 
 					while (_history[this.count]) this.doMove(_history[this.count]);
 
-					if (i === 0 && black | white) {
+					if (_i8 === 0 && black | white) {
 						return {
 							winner: black ? "white" : "black",
 							reason: "連続王手の千日手"
@@ -1108,11 +1151,96 @@
 
 	var moveArray = new Uint8Array(2 * Position.MAX_MOVES_NUM_IN_A_POSITION * 5);
 
-	module.exports = Position;
+	var hashSeeds = new Int32Array(100 * 64 * 2);
+
+	for (var i = 0; i < hashSeeds.length; ++i) hashSeeds[i] = bits.random.next32();
+
+	function getHashSeed54(s, i) {
+		return bits.make54(hashSeeds[s + i * 64 << 1], hashSeeds[s + i * 64 << 1 | 1]);
+	}
+
+	function getHandHashSeed54(s) {
+		return bits.make54(hashSeeds[s << 1 | 1], hashSeeds[s << 1]);
+	}
 	module.exports = exports["default"];
 
 /***/ },
 /* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.xor54 = xor54;
+	exports.make54 = make54;
+	exports.print32 = print32;
+	exports.print54 = print54;
+
+	function xor54() {
+		var minus = 0,
+		    lbs = 0,
+		    rbs = 0;
+
+		for (var _len = arguments.length, xs = Array(_len), _key = 0; _key < _len; _key++) {
+			xs[_key] = arguments[_key];
+		}
+
+		for (var i = 0; i < xs.length; ++i) {
+			if (xs[i] < 0) {
+				xs[i] += 0x20000000000000;
+				minus ^= 1;
+			}
+			lbs ^= xs[i] / 0x80000000;
+			rbs ^= xs[i] & 0x7FFFFFFF;
+		}
+
+		lbs *= 0x80000000;
+		if (minus) return -0x20000000000000 + lbs + rbs;else return lbs + rbs;
+	}
+
+	function make54(a, b) {
+		if (a & 0x200000) {
+			if (b < 0) {
+				return -0x20000000000000 + (a & 0x1FFFFF) * 0x100000000 + (b + 0x100000000);
+			} else {
+				return -0x20000000000000 + (a & 0x1FFFFF) * 0x100000000 + b;
+			}
+		} else {
+			if (b < 0) {
+				return (a & 0x1FFFFF) * 0x100000000 + (b + 0x100000000);
+			} else {
+				return (a & 0x1FFFFF) * 0x100000000 + b;
+			}
+		}
+	}
+
+	function print32(x) {
+		if (0 <= x) return (new Array(32).join("0") + x.toString(2)).slice(-32);else return (new Array(32).join("0") + (x + Math.pow(2, 32)).toString(2)).slice(-32);
+	}
+
+	function print54(x) {
+		if (0 <= x) return (new Array(54).join("0") + x.toString(2)).slice(-54);else return "1" + (new Array(53).join("0") + (x + Math.pow(2, 53)).toString(2)).slice(-53);
+	}
+
+	var random = {
+		x: 123456789,
+		y: 362436069,
+		z: 521288629,
+		w: 88675123,
+		next32: function next32() {
+			var t = this.x ^ this.x << 11;
+			this.x = this.y;
+			this.y = this.z;
+			this.z = this.w;
+			return this.w = this.w ^ this.w >>> 19 ^ t ^ t >>> 8;
+		}
+	};
+	exports.random = random;
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1144,7 +1272,7 @@
 	PIECE_SCORE_TABLE[14] = 45;
 	PIECE_SCORE_TABLE[15] = 46;
 
-	var MAX_SEARCH_DEPTH = 5;
+	var MAX_SEARCH_DEPTH = 8;
 
 	var moveArray = new Uint8Array(_positionJs2["default"].MAX_MOVES_NUM_IN_A_POSITION * MAX_SEARCH_DEPTH * 5);
 
@@ -1195,6 +1323,21 @@
 	function search(position, depth, alpha, beta, mi1) {
 		if (depth === 0) return position.player === 16 ? evalPosition(position) : -evalPosition(position);
 
+		if (depth === 1) {
+			var mi2 = position.allMoves(moveArray, mi1, true),
+			    scoreBase = position.player === 16 ? evalPosition(position) : -evalPosition(position);
+
+			for (var i = mi1; i < mi2; i += 5) {
+				var score = scoreBase + PIECE_SCORE_TABLE[moveArray[i + 4] & 15];
+				if (alpha < score) {
+					alpha = score;
+					if (beta <= alpha) return alpha;
+				}
+			}
+
+			return alpha;
+		}
+
 		var mi2 = position.allMoves(moveArray, mi1, depth === 1);
 		sortMoves(position, mi1, mi2);
 
@@ -1202,11 +1345,11 @@
 			if ((moveArray[i + 4] & 15) === 8) return 65000 + depth;
 
 			position.doMoveFast(moveArray, i);
-			var score = -search(position, depth - 1, -beta, -alpha, mi2);
+			var _score = -search(position, depth - 1, -beta, -alpha, mi2);
 			position.undoMoveFast(moveArray, i);
 
-			if (alpha < score) {
-				alpha = score;
+			if (alpha < _score) {
+				alpha = _score;
 				if (beta <= alpha) return alpha;
 			}
 		}
@@ -1218,7 +1361,7 @@
 		sortMoves(position, 0, mi);
 
 		var bestMove = -1,
-		    alpha = -65535;
+		    alpha = -65535; //var r = position.count < 15; //  + (r ? Math.random() * 3 - 1 | 0 : 0)
 		for (var i = 0; i < mi; i += 5) {
 			if ((moveArray[i + 4] & 15) === 8) return "check mated";
 
@@ -1247,7 +1390,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1345,12 +1488,12 @@
 	}
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(7)
-	module.exports = __webpack_require__(11)
-	module.exports.template = __webpack_require__(12)
+	__webpack_require__(8)
+	module.exports = __webpack_require__(12)
+	module.exports.template = __webpack_require__(13)
 	if (false) {
 	(function () {
 	var Vue = require("vue")
@@ -1370,16 +1513,16 @@
 	}
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 
 	// load the styles
-	var content = __webpack_require__(8);
+	var content = __webpack_require__(9);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(10)(content, {});
+	var update = __webpack_require__(11)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -1396,10 +1539,10 @@
 	}
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(9)();
+	exports = module.exports = __webpack_require__(10)();
 	// imports
 
 
@@ -1410,7 +1553,7 @@
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	/*
@@ -1466,7 +1609,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -1691,7 +1834,7 @@
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1706,7 +1849,7 @@
 	module.exports = exports["default"];
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	module.exports = "<g class=\"piece\"\n\t\t v-attr=\"transform: $data | position\"\n\t\t v-on=\"click: onClick($event, $data)\">\n\t\t <use xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"#pieceShape\"\n\t\t\t \t\tfill=\"{{$data === selectedPiece ? '#FFEACF' : '#F0C895'}}\"\n\t\t\t\t\tstroke=\"#4A361B\" />\n\t\t <text x=\"-7\" y=\"0\"  fill=\"#4A361B\" font-size=\"14px\">{{label[0]}}</text>\n\t\t <text x=\"-7\" y=\"14\" fill=\"#4A361B\" font-size=\"14px\">{{label[1]}}</text>\n\t</g>";

@@ -1,56 +1,77 @@
 "use strict";
 
+import * as bits from "./bits.js";
+
+
 export default class Position {
 
 	static get MAX_MOVES_NUM_IN_A_POSITION() {
 		return 593;
 	}
 
-	constructor() {
-		this.player = 0b010000;
+	constructor(position) {
 		this.board = new Uint8Array(111);
 		this.bPieces = new Uint8Array(7);
 		this.wPieces = new Uint8Array(7);
-		this.hash1 = 0;
-		this.history = [];
-		this.hash1Counts = {};
-		this.check = false;
 
-		for (let i = 0; i < 10; ++i) {
-			this.board[i]       = 0b1000000;
-			this.board[i*10+10] = 0b1000000;
-			this.board[i+101]   = 0b1000000;
+		if (position instanceof Position) {
+			this.player = position.player;
+			this.hash32 = position.hash32;
+			this.hash54 = position.hash54;
+			this.history = position.history.concat();
+			this.hash32Counts = {};
+			this.check = position.check;
+
+			for (let i = 0; i < 7; ++i)
+				this.bPieces[i] = position.bPieces[i], this.wPieces[i] = position.wPieces[i];
+			for (let i = 0; i < 111; ++i)
+				this.board[i] = position.board[i];
+			for (let key in position.hash32Counts)
+				this.hash32Counts[key] = position.hash32Counts[key];
+		} else {
+			this.player = 0b010000;
+			this.hash32 = 0;
+			this.hash54 = 0;
+			this.history = [];
+			this.hash32Counts = {};
+			this.check = false;
+
+			for (let i = 0; i < 10; ++i) {
+				this.board[i]       = 0b1000000;
+				this.board[i*10+10] = 0b1000000;
+				this.board[i+101]   = 0b1000000;
+			}
+
+			this.board[11 + 10 * 0 + 0] = 0b100110;
+			this.board[11 + 10 * 0 + 1] = 0b100101;
+			this.board[11 + 10 * 0 + 2] = 0b100100;
+			this.board[11 + 10 * 0 + 3] = 0b100011;
+			this.board[11 + 10 * 0 + 4] = 0b101000;
+			this.board[11 + 10 * 0 + 5] = 0b100011;
+			this.board[11 + 10 * 0 + 6] = 0b100100;
+			this.board[11 + 10 * 0 + 7] = 0b100101;
+			this.board[11 + 10 * 0 + 8] = 0b100110;
+			this.board[11 + 10 * 1 + 1] = 0b100001;
+			this.board[11 + 10 * 1 + 7] = 0b100010;
+
+			for (let i = 0; i < 9; ++i)
+				this.board[11 + 10 * 2 + i] = 0b100111;
+
+			this.board[11 + 10 * 8 + 0] = 0b010110;
+			this.board[11 + 10 * 8 + 1] = 0b010101;
+			this.board[11 + 10 * 8 + 2] = 0b010100;
+			this.board[11 + 10 * 8 + 3] = 0b010011;
+			this.board[11 + 10 * 8 + 4] = 0b011000;
+			this.board[11 + 10 * 8 + 5] = 0b010011;
+			this.board[11 + 10 * 8 + 6] = 0b010100;
+			this.board[11 + 10 * 8 + 7] = 0b010101;
+			this.board[11 + 10 * 8 + 8] = 0b010110;
+			this.board[11 + 10 * 7 + 1] = 0b010010;
+			this.board[11 + 10 * 7 + 7] = 0b010001;
+
+			for (let i = 0; i < 9; ++i)
+				this.board[11 + 10 * 6 + i] = 0b010111;
 		}
-
-		this.board[11 + 10 * 0 + 0] = 0b100110;
-		this.board[11 + 10 * 0 + 1] = 0b100101;
-		this.board[11 + 10 * 0 + 2] = 0b100100;
-		this.board[11 + 10 * 0 + 3] = 0b100011;
-		this.board[11 + 10 * 0 + 4] = 0b101000;
-		this.board[11 + 10 * 0 + 5] = 0b100011;
-		this.board[11 + 10 * 0 + 6] = 0b100100;
-		this.board[11 + 10 * 0 + 7] = 0b100101;
-		this.board[11 + 10 * 0 + 8] = 0b100110;
-		this.board[11 + 10 * 1 + 1] = 0b100001;
-		this.board[11 + 10 * 1 + 7] = 0b100010;
-
-		for (let i = 0; i < 9; ++i)
-			this.board[11 + 10 * 2 + i] = 0b100111;
-
-		this.board[11 + 10 * 8 + 0] = 0b010110;
-		this.board[11 + 10 * 8 + 1] = 0b010101;
-		this.board[11 + 10 * 8 + 2] = 0b010100;
-		this.board[11 + 10 * 8 + 3] = 0b010011;
-		this.board[11 + 10 * 8 + 4] = 0b011000;
-		this.board[11 + 10 * 8 + 5] = 0b010011;
-		this.board[11 + 10 * 8 + 6] = 0b010100;
-		this.board[11 + 10 * 8 + 7] = 0b010101;
-		this.board[11 + 10 * 8 + 8] = 0b010110;
-		this.board[11 + 10 * 7 + 1] = 0b010010;
-		this.board[11 + 10 * 7 + 7] = 0b010001;
-
-		for (let i = 0; i < 9; ++i)
-			this.board[11 + 10 * 6 + i] = 0b010111;
 	}
 
 	allMoves(ma, mi, exceptDrops) {
@@ -59,7 +80,7 @@ export default class Position {
 		opPlayer = player ^ 0b110000,
 		fuUsed = 1 << 0;
 
-		for (let i = 11; i < 101; ++i) {
+		for (var i = 11; i < 101; ++i) {
 			let sq = board[i];
 
 			if (!(sq & player)) continue;
@@ -353,7 +374,7 @@ export default class Position {
 			return mi;
 
 		var pieces = player === 0b010000 ? this.bPieces : this.wPieces;
-		for (let i = 11; i < 101; ++i) {
+		for (var i = 11; i < 101; ++i) {
 			if (board[i] !== 0) continue;
 			if (pieces[0])
 			{ ma[mi++] = 0b10000000; ma[mi++] = i; mi++; ma[mi++] = 0b0001 | player; ma[mi++] = 0; }
@@ -366,12 +387,12 @@ export default class Position {
 		}
 		if (player === 0b010000) {
 			if (pieces[4]) {
-				for (let i = 31; i < 101; ++i) {
+				for (var i = 31; i < 101; ++i) {
 					if (board[i] === 0)
 					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b0101 | 0b010000; ma[mi++] = 0; }
 				}
 			}
-			for (let i = 21; i < 101; ++i) {
+			for (var i = 21; i < 101; ++i) {
 				if (board[i] !== 0) continue;
 				if (pieces[5])
 				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b0110 | 0b010000; ma[mi++] = 0; }
@@ -380,12 +401,12 @@ export default class Position {
 			}
 		} else {
 			if (pieces[4]) {
-				for (let i = 11; i < 81; ++i) {
+				for (var i = 11; i < 81; ++i) {
 					if (board[i] === 0)
 					{ ma[mi++] = 0b10000100; ma[mi++] = i; mi++; ma[mi++] = 0b0101 | 0b100000; ma[mi++] = 0; }
 				}
 			}
-			for (let i = 11; i < 91; ++i) {
+			for (var i = 11; i < 91; ++i) {
 				if (board[i] !== 0) continue;
 				if (pieces[5])
 				{ ma[mi++] = 0b10000101; ma[mi++] = i; mi++; ma[mi++] = 0b0110 | 0b100000; ma[mi++] = 0; }
@@ -403,7 +424,7 @@ export default class Position {
 		to = move.to,
 		board = this.board,
 		player = this.player;
-		this.hash1Counts[this.hash1] = (this.hash1Counts[this.hash1] | 0) + 1;
+		this.hash32Counts[this.hash32] = (this.hash32Counts[this.hash32] | 0) + 1;
 
 		if (fromIdx & 0b10000000) {
 			board[toIdx] = to;
@@ -413,8 +434,12 @@ export default class Position {
 			else
 				this.wPieces[fromIdx & 0b1111111] -= 1;
 
-			this.hash1 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
+			this.hash32 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+
+			this.hash54 = bits.xor54(this.hash54,
+															 getHashSeed54(to, toIdx),
+															 getHandHashSeed54(to));
 		} else {
 			board[toIdx] = to;
 			board[fromIdx] = 0b000000;
@@ -426,13 +451,23 @@ export default class Position {
 				else
 					this.wPieces[(capture & 0b111) - 1] += 1;
 
-				this.hash1 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					(capture * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+
+				this.hash54 = bits.xor54(this.hash54,
+																 getHashSeed54(move.from, fromIdx),
+																 getHashSeed54(to, toIdx),
+																 getHashSeed54(capture, toIdx),
+																 getHandHashSeed54(capture));
 			} else {
-				this.hash1 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx));
+
+				this.hash54 = bits.xor54(this.hash54,
+																 getHashSeed54(move.from, fromIdx),
+																 getHashSeed54(to, toIdx));
 			}
 		}
 		this.player = player ^ 0b110000;
@@ -456,8 +491,12 @@ export default class Position {
 			else
 				this.wPieces[fromIdx & 0b1111111] += 1;
 
-			this.hash1 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
+			this.hash32 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+
+			this.hash54 = bits.xor54(this.hash54,
+															 getHashSeed54(to, toIdx),
+															 getHandHashSeed54(to));
 		} else {
 			board[fromIdx] = move.from;
 
@@ -470,18 +509,28 @@ export default class Position {
 				else
 					this.wPieces[(capture & 0b111) - 1] -= 1;
 
-				this.hash1 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					(capture * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
+
+				this.hash54 = bits.xor54(this.hash54,
+																 getHashSeed54(move.from, fromIdx),
+																 getHashSeed54(to, toIdx),
+																 getHashSeed54(capture, toIdx),
+																 getHandHashSeed54(capture));
 			} else {
 				board[toIdx] = 0b000000;
 
-				this.hash1 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (move.from * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx));
+
+				this.hash54 = bits.xor54(this.hash54,
+																 getHashSeed54(move.from, fromIdx),
+																 getHashSeed54(to, toIdx));
 			}
 		}
-		this.hash1Counts[this.hash1] -= 1;
+		this.hash32Counts[this.hash32] -= 1;
 		this.check = this.isCheck();
 	}
 
@@ -500,7 +549,7 @@ export default class Position {
 			else
 				this.wPieces[fromIdx & 0b1111111] -= 1;
 
-			this.hash1 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
+			this.hash32 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
 			board[toIdx] = to;
@@ -513,12 +562,12 @@ export default class Position {
 				else
 					this.wPieces[(capture & 0b111) - 1] += 1;
 
-				this.hash1 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(ma[mi+2] * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					(capture * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 			} else {
-				this.hash1 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx));
 			}
 		}
@@ -540,7 +589,7 @@ export default class Position {
 			else
 				this.wPieces[fromIdx & 0b1111111] += 1;
 
-			this.hash1 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
+			this.hash32 ^= (to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 				((to & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 		} else {
 			board[fromIdx] = ma[mi+2];
@@ -554,14 +603,14 @@ export default class Position {
 				else
 					this.wPieces[(capture & 0b111) - 1] -= 1;
 
-				this.hash1 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(ma[mi+2] * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					(capture * (222630977 + (9 << (toIdx & 0b1111)) + toIdx)) ^
 					((capture & 0b1111) * (0b1010111010111 << (player & 0b10000)));
 			} else {
 				board[toIdx] = 0b000000;
 
-				this.hash1 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
+				this.hash32 ^= (ma[mi+2] * (222630977 + (9 << (fromIdx & 0b1111)) + fromIdx)) ^
 					(to * (222630977 + (9 << (toIdx & 0b1111)) + toIdx));
 			}
 		}
@@ -605,8 +654,8 @@ export default class Position {
 	}
 
 	judge() {
-		if (this.hash1Counts[this.hash1] === 3) {
-			let hash1 = this.hash1,
+		if (this.hash32Counts[this.hash32] > 3) {
+			let hash54 = this.hash54,
 			history = this.history.concat(),
 			i = 4,
 			black = true, white = true;
@@ -616,7 +665,7 @@ export default class Position {
 					black &= this.check;
 				else
 					white &= this.check;
-				if (this.hash1 === hash1 && --i === 0)
+				if (this.hash54 === hash54 && --i === 0)
 					break;
 				this.undoMove();
 			}
@@ -677,4 +726,16 @@ export default class Position {
 
 const moveArray = new Uint8Array(2 * Position.MAX_MOVES_NUM_IN_A_POSITION * 5);
 
-module.exports = Position;
+
+const hashSeeds = new Int32Array(100 * 64 * 2);
+
+for (var i = 0; i < hashSeeds.length; ++i)
+	hashSeeds[i] = bits.random.next32();
+
+function getHashSeed54(s, i) {
+	return bits.make54(hashSeeds[(s+i*64)<<1], hashSeeds[(s+i*64)<<1|1]);
+}
+
+function getHandHashSeed54(s) {
+	return bits.make54(hashSeeds[s<<1|1], hashSeeds[s<<1]);
+}

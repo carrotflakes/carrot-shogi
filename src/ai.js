@@ -19,7 +19,7 @@ PIECE_SCORE_TABLE[0b1101] = 45;
 PIECE_SCORE_TABLE[0b1110] = 45;
 PIECE_SCORE_TABLE[0b1111] = 46;
 
-const MAX_SEARCH_DEPTH = 5;
+const MAX_SEARCH_DEPTH = 8;
 
 const moveArray = new Uint8Array(Position.MAX_MOVES_NUM_IN_A_POSITION * MAX_SEARCH_DEPTH * 5);
 
@@ -77,6 +77,22 @@ function search(position, depth, alpha, beta, mi1) {
 	if (depth === 0)
 		return (position.player === 0b010000) ? evalPosition(position) : -evalPosition(position);
 
+	if (depth === 1) {
+		var mi2 = position.allMoves(moveArray, mi1, true),
+		scoreBase = (position.player === 0b010000) ? evalPosition(position) : -evalPosition(position);
+
+		for (let i = mi1; i < mi2; i += 5) {
+			var score = scoreBase + PIECE_SCORE_TABLE[moveArray[i+4] & 0b1111];
+			if (alpha < score) {
+				alpha = score;
+				if (beta <= alpha)
+					return alpha;
+			}
+		}
+
+		return alpha;
+	}
+
 	var mi2 = position.allMoves(moveArray, mi1, depth === 1);
 	sortMoves(position, mi1, mi2);
 
@@ -103,7 +119,7 @@ export default function ai(position, depth) {
 	sortMoves(position, 0, mi);
 
 	var bestMove = -1,
-	alpha = -65535;
+	alpha = -65535; //var r = position.count < 15; //  + (r ? Math.random() * 3 - 1 | 0 : 0)
 	for (let i = 0; i < mi; i += 5) {
 		if ((moveArray[i+4] & 0b1111) === 0b1000)
 			return "check mated";

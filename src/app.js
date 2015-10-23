@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Position from "./position.js";
 import ai from "./ai.js";
+import * as bits from "./bits.js";
 import * as sound from "./sound.js";
 import pieceComponent from "./components/piece.vue";
 
@@ -64,7 +65,8 @@ var appVm = new Vue({
 		sound: true,
 		enableDebug: false,
 		debugInfo: {
-			hash1: null,
+			hash32: null,
+			hash54: null,
 			check: null,
 			thinkTime: null,
 			thinkScore: null,
@@ -129,8 +131,8 @@ var appVm = new Vue({
 
 			this.lastMoveIndex = position.count > 0 ? position.history[position.count - 1].toIdx : 0;
 
-			this.debugInfo.hash1 =
-				(new Array(32+1).join("0") + (position.hash1 < 0 ? position.hash1 + Math.pow(2,32) : position.hash1).toString(2)).slice(-32);
+			this.debugInfo.hash32 = bits.print32(position.hash32);
+			this.debugInfo.hash54 = bits.print54(position.hash54);
 			this.debugInfo.check = position.check;
 		},
 		move(fromIdx, toIdx) {
