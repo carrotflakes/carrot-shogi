@@ -14,7 +14,7 @@ if ("AudioContext" in window) {
 
 
 export function gameStart() {
-	if (context === null)
+	if (!AVAILABLE)
 		return;
 
 	var time = context.currentTime + 0.01;
@@ -23,14 +23,13 @@ export function gameStart() {
 	osc.frequency.value = 440;
 	osc.connect(gain);
 	osc.start(time);
-	//osc.frequency.setValueAtTime(440 * 5 / 4, time + 0.1);
 	osc.frequency.setValueAtTime(440 * 4 / 3, time + 0.1);
 	osc.frequency.setValueAtTime(440 * 3 / 2, time + 0.2);
 	osc.stop(time + 0.3);
 }
 
 export function move() {
-	if (context === null)
+	if (!AVAILABLE)
 		return;
 
 	var time = context.currentTime + 0.01;
@@ -43,7 +42,7 @@ export function move() {
 }
 
 export function pipu() {
-	if (context === null)
+	if (!AVAILABLE)
 		return;
 
 	var time = context.currentTime + 0.01;
@@ -57,7 +56,7 @@ export function pipu() {
 }
 
 export function check() {
-	if (context === null)
+	if (!AVAILABLE)
 		return;
 
 	var time = context.currentTime + 0.01;
@@ -71,7 +70,7 @@ export function check() {
 }
 
 export function gameEnd() {
-	if (context === null)
+	if (!AVAILABLE)
 		return;
 
 	var time = context.currentTime + 0.01;

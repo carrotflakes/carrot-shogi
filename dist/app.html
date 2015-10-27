@@ -23,6 +23,7 @@ margin-top: 10px;
 -moz-user-select: none;
 user-select: none;
 font-family: "ヒラギノ明朝 ProN W6", "HiraMinProN-W6", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", "MS 明朝", serif;
+cursor: default;
 }
 
 .svg-button {
@@ -49,9 +50,9 @@ font-weight: bold;
 
 		<rect fill="#B08854" x="100" y="0" width="372" height="372" />
 		<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
-					x="1" y="1" width="96" height="282" />
+					x="1" y="1" width="96" height="162" />
 		<rect fill="#E8B36D" stroke="#B08854" stroke-width="2"
-					x="475" y="89" width="96" height="282" />
+					x="475" y="209" width="96" height="162" />
 
 		<g>
 			<template v-repeat="y in [0,1,2,3,4,5,6,7,8]">
@@ -81,27 +82,46 @@ font-weight: bold;
 
 		<g class="svg-button"
 			 transform="translate(0, 286)"
-			 v-on="click: init">
-			<rect fill="#A7D8A5"
-						x="0" y="0" width="98" height="28" />
-			<text fill="#046142" x="6" y="20" font-size="15">指し直す</text>
+			 v-on="click: matta">
+			<rect x="0" y="0" width="98" height="28"
+						fill="{{gameMode && !gameResult ? '#A7D8A5' : '#CCC'}}" />
+			<text x="6" y="20" font-size="15"
+						fill="{{gameMode && !gameResult ? '#046142' : '#777'}}">
+				待った
+			</text>
 		</g>
 
 		<g class="svg-button"
 			 transform="translate(0, 315)"
-			 v-on="click: matta">
-			<rect fill="#A7D8A5"
-						x="0" y="0" width="98" height="28" />
-			<text fill="#046142" x="6" y="20" font-size="15">待った</text>
+			 v-on="click: init">
+			<rect x="0" y="0" width="98" height="28"
+						fill="{{gameMode && !gameResult ? '#A7D8A5' : '#CCC'}}" />
+			<text x="6" y="20" font-size="15"
+						fill="{{gameMode && !gameResult ? '#046142' : '#777'}}">
+				投了
+			</text>
 		</g>
 
 		<g class="svg-button"
 			 transform="translate(0, 344)"
 			 v-on="click: sound = !sound">
-			<rect fill="#A7D8A5"
-						x="0" y="0" width="98" height="28" />
-			<text fill="#046142" x="6" y="20" font-size="15">音: {{sound ? "あり" : "なし"}}</text>
+			<rect x="0" y="0" width="98" height="28"
+						fill="{{soundAvailable ? '#A7D8A5' : '#CCC'}}" />
+			<text x="6" y="20" font-size="15"
+						fill="{{soundAvailable ? '#046142' : '#777'}}">
+				音: {{sound ? "あり" : "なし"}}
+			</text>
 		</g>
+
+		<!--g class="svg-button"
+			 transform="translate(474, 0)">
+			<rect x="0" y="0" width="98" height="28"
+						fill="{{true ? '#D8A2A2' : '#CCC'}}" />
+			<text x="6" y="20" font-size="15"
+						fill="{{true ? '#610404' : '#777'}}">
+				先手: {{""}}
+			</text>
+		</g-->
 
 		<g class="svg-button"
 			 style="display: none;"
@@ -129,46 +149,69 @@ font-weight: bold;
 						x="-120" y="0" width="240" height="200" />
 
 			<text fill="#555"
-						x="-75" y="50" font-size="24">対局開始</text>
+						x="-75" y="40" font-size="24">対局開始</text>
 			<g class="svg-button"
-				 transform="translate(-75, 80)"
+				 transform="translate(-75, 75)"
 				 v-on="click: gameStart('sente')">
-				<rect fill="#F56F49"
+				<rect fill="#D83709"
 							x="0" y="0" width="150" height="38" />
-				<text fill="#000" x="6" y="26" font-size="20">先手で対局</text>
+				<text fill="#FFF" x="6" y="26" font-size="20">先手で対局</text>
 			</g>
 			<g class="svg-button"
 				 transform="translate(-75, 130)"
 				 v-on="click: gameStart('gote')">
-				<rect fill="#F56F49"
+				<rect fill="#D83709"
 							x="0" y="0" width="150" height="38" />
-				<text fill="#000" x="6" y="26" font-size="20">後手で対局</text>
+				<text fill="#FFF" x="6" y="26" font-size="20">後手で対局</text>
 			</g>
 		</g>
 
 		<g transform="translate(286, 80)"
-			 v-show="gameResult !== null">
+			 v-if="gameResult !== null">
 			<rect fill="rgba(247,247,247,0.8)" stroke="#F7F7F7" stroke-width="2"
 						x="-120" y="0" width="240" height="200" />
 
 			<text fill="#555"
-						x="-75" y="50" font-size="24">終局</text>
-			<text fill="#111"
-						x="-75" y="110" font-size="20"
-						v-text="gameResult"></text>
+						x="-75" y="40" font-size="24">終局</text>
+			<template v-repeat="line in gameResult">
+				<text fill="#111"
+							x="-75" font-size="18"
+							v-text="line"
+							v-attr="y: 80 + $index * 26"></text>
+			</template>
+			<g class="svg-button"
+				 transform="translate(-75, 135)"
+				 v-on="click: reset">
+				<rect fill="#D83709"
+							x="0" y="0" width="150" height="38" />
+				<text fill="#FFF" x="6" y="26" font-size="20">再対局</text>
+			</g>
 		</g>
 	</svg>
-	<div v-if="enableDebug" v-cloak style="font-size: 12px;">
-		Hash32: {{debugInfo.hash32 + ""}}<br>
-		Hash54: {{debugInfo.hash54 + ""}}<br>
-		Check: {{debugInfo.check + ""}}<br>
-		ThinkTime: {{debugInfo.thinkTime + " ms"}}<br>
-		ThinkScore: {{debugInfo.thinkScore}}<br>
-		<button v-on="click: moveByAI()">AI</button>
+	<div v-if="enableDebug" v-cloak style="font-size: 12px; line-height: 1.1em;">
+		<button v-on="click: undo">undo</button>
+		<button v-on="click: moveByAI">AI</button>
+		<button v-on="click: selfMatch">AI vs AI</button>
+		<button v-on="click: hoge">hoge</button>
+		<button v-on="click: printBoard">printBoard</button><br>
 		<button v-on="click: gameMode = 'sente'">gameMode = sente</button>
 		<button v-on="click: gameMode = 'gote'">gameMode = gote</button>
 		<button v-on="click: gameMode = 'free'">gameMode = free</button>
-		<button v-on="click: gameResult = null">gameResult = null</button>
+		<button v-on="click: gameResult = null">gameResult = null</button><br>
+		<template v-repeat="positionName in debugInfo.positionList">
+			<span style="cursor: default" v-on="click: initPosition(positionName)">{{positionName}}</span> |
+		</template>
+		<br>
+		Hash: {{debugInfo.hash + ""}}<br>
+		Check: {{debugInfo.check + ""}}<br>
+		Count: {{debugInfo.count + ""}}<br>
+		ThinkTime: {{debugInfo.thinkTime + " ms (mean " + Math.round(debugInfo.thinkTimeTotal / debugInfo.thinkTimeSampleCount) + " ms)"}}<br>
+		ThinkScore: {{debugInfo.thinkScore}}<br>
+		ExpectedMoves: {{debugInfo.expectedMoves}}<br>
+		AllMovesCount: {{debugInfo.allMovesCount}}<br>
+		AI.Time: <input type="number" v-model="aiParameter.time" min="0" max="5000" step="100" /><br>
+		AI.SearchDepth: <input type="number" v-model="aiParameter.searchDepth" min="1" max="10" /><br>
+		AI.Randomness: <input type="number" v-model="aiParameter.randomness" min="0" max="100" /><br>
 	</div>
 </div>
 

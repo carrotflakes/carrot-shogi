@@ -1,8 +1,9 @@
 import Vue from "vue";
 import Position from "./position.js";
-import ai from "./ai.js";
+import * as ai from "./ai.js";
 import * as bits from "./bits.js";
 import * as sound from "./sound.js";
+import * as positionBook from "./positionBook.js";
 import pieceComponent from "./components/piece.vue";
 
 
@@ -24,7 +25,6 @@ const LABEL_TABLE = {
 };
 
 var position = new Position();
-var searchDepth = 4;
 
 
 Vue.filter('position', function (piece) {
@@ -54,22 +54,35 @@ var appVm = new Vue({
 				x: -31,
 				y: 31,
 				black: true,
+				promoted: false,
 			},
 			promotedPiece: {
 				label: "と金",
 				x: 31,
 				y: 31,
 				black: true,
+				promoted: true,
 			},
 		},
+		aiParameter: {
+			time: 300,
+			searchDepth: 5,
+			randomness: 5,
+		},
+		soundAvailable: sound.AVAILABLE,
 		sound: true,
 		enableDebug: false,
 		debugInfo: {
-			hash32: null,
-			hash54: null,
+			hash: null,
 			check: null,
+			count: null,
 			thinkTime: null,
+			thinkTimeTotal: 0,
+			thinkTimeSampleCount: 0,
 			thinkScore: null,
+			expectedMoves: null,
+			allMovesCount: null,
+			positionList: positionBook.list,
 		},
 	},
 	methods: {
@@ -87,6 +100,20 @@ var appVm = new Vue({
 			this.promotionSelect.show = false;
 			this.draw();
 		},
+		undo() {
+			if (position.count === 0)
+				return;
+
+			this.gameResult = null;
+			this.selectedPiece = null;
+			position.undoMove();
+			this.promotionSelect.show = false;
+			this.draw();
+		},
+		reset() {
+			this.gameMode = this.gameResult = null;
+			this.sound && sound.move();
+		},
 		draw() {
 			var newPieces = [];
 			for (let i = 0; i < position.board.length; ++i) {
@@ -99,6 +126,7 @@ var appVm = new Vue({
 						x: 100 + 2 + 41 * ((i - 11) % 10) + 20,
 						y: 2 + 41 * ((i - 11) / 10 | 0) + 20,
 						index: i,
+						promoted: !!((sq & 0b1111) !== 0b1000 && sq & 0b1000),
 						_uid: (i << 8) + sq,
 					});
 				}
@@ -108,9 +136,10 @@ var appVm = new Vue({
 					newPieces.push({
 						label: LABEL_TABLE[i + 1],
 						black: true,
-						x: 496 + 4 * j,
-						y: 372 - 22 - i * 40,
-						index: i ^ 0b10000000,
+						x: 496 + 4 * j + 48 * (i % 2),
+						y: 372 - 22 - (i / 2 | 0) * 40,
+						index: i,
+						promoted: false,
 						_uid: (1 << 16) + (i << 8) + j,
 					});
 				}
@@ -120,9 +149,10 @@ var appVm = new Vue({
 					newPieces.push({
 						label: LABEL_TABLE[i + 1],
 						black: false,
-						x: 20 + 4 * j,
-						y: 22 + i * 40,
-						index: i ^ 0b10000000,
+						x: 20 + 4 * j + 48 * (i % 2),
+						y: 22 + (i / 2 | 0) * 40,
+						index: i,
+						promoted: false,
 						_uid: (2 << 16) + (i << 8) + j,
 					});
 				}
@@ -131,9 +161,9 @@ var appVm = new Vue({
 
 			this.lastMoveIndex = position.count > 0 ? position.history[position.count - 1].toIdx : 0;
 
-			this.debugInfo.hash32 = bits.print32(position.hash32);
-			this.debugInfo.hash54 = bits.print54(position.hash54);
+			this.debugInfo.hash = bits.print54(position.hash);
 			this.debugInfo.check = position.check;
+			this.debugInfo.count = position.count;
 		},
 		move(fromIdx, toIdx) {
 			if (fromIdx === toIdx) {
@@ -161,15 +191,7 @@ var appVm = new Vue({
 			}
 		},
 		move_(fromIdx, toIdx, promote) {
-			if (fromIdx & 0b10000000) {
-				position.doMove({
-					fromIdx,
-					toIdx,
-					from: 0,
-					to: (fromIdx & 0b111) + 1 | position.player,
-					capture: 0,
-				});
-			} else {
+			if (fromIdx & 0b1111000) {
 				let from = position.board[fromIdx];
 				position.doMove({
 					fromIdx,
@@ -177,6 +199,14 @@ var appVm = new Vue({
 					from: from,
 					to: promote ? from | 0b1000 : from,
 					capture: position.board[toIdx],
+				});
+			} else {
+				position.doMove({
+					fromIdx,
+					toIdx,
+					from: 0,
+					to: fromIdx + 1 | position.player,
+					capture: 0,
 				});
 			}
 
@@ -194,20 +224,28 @@ var appVm = new Vue({
 			if ((this.gameMode === "sente" | this.gameMode === "gote") && position.player === 0b100000)
 				window.setTimeout(() => this.moveByAI(), 100);
 		},
-		moveByAI() {
+		moveByAI(after) {
 			if (this.gameMode === null)
 				return;
 
 			var startTime = new Date().getTime();
-			var move = ai(position, searchDepth);
-			this.debugInfo.thinkTime = new Date().getTime() - startTime;
+			var move = ai.think(position, +this.aiParameter.searchDepth, +this.aiParameter.randomness, +this.aiParameter.time);
+			var time = new Date().getTime() - startTime;
+			this.debugInfo.thinkTime = time;
+			this.debugInfo.thinkTimeTotal += time;
+			this.debugInfo.thinkTimeSampleCount += 1;
 			this.debugInfo.thinkScore = move.score;
+			this.debugInfo.expectedMoves = ai.getExpectedMoves(position);
+			this.debugInfo.allMovesCount = ai.getAllMovesCount();
+			if (move.depth)
+				this.aiParameter.searchDepth = move.depth;
 
 			if (move === null) {
-				this.gameResult = "あなたの勝ちです?";
+				this.gameResult = ["あなたの勝ちです?"];
 				return;
 			}
 			position.doMove(move);
+			ai.settle(position);
 
 			this.promotionSelect.show = false;
 			this.draw();
@@ -219,18 +257,22 @@ var appVm = new Vue({
 			}
 
 			this.sound && sound[position.check ? "check" : "move"]();
+
+			if (after instanceof Function)
+				after();
 		},
 		gameEnd(winner, message) {
+			var reason = message ? "[" + message + "]" : "";
 			if (winner === null) {
-					this.gameResult = "引き分けです " + message;
+				this.gameResult = ["引き分けです", reason];
 			} else {
 				switch (this.gameMode) {
 				case "sente":
 				case "gote":
-					this.gameResult = (winner === "black" ? "あなたの勝ちです" : "あなたの負けです") + " " + message;
-					break;
+					this.gameResult = [winner === "black" ? "あなたの勝ちです" : "あなたの負けです", reason];
+				break;
 				case "free":
-					this.gameResult = (winner === "black" ? "先手の勝ちです" : "後手の勝ちです") + " " + message;
+					this.gameResult = [winner === "black" ? "先手の勝ちです" : "後手の勝ちです", reason];
 					break;
 				}
 			}
@@ -260,8 +302,8 @@ var appVm = new Vue({
 			if (this.selectedPiece === piece) {
 				this.selectedPiece = null;
 			} else if (this.selectedPiece &&
-								 !(this.selectedPiece.index & 0b10000000) &&
-								 !(piece.index & 0b10000000)) {
+								 this.selectedPiece.index & 0b1111000 &&
+								 piece.index & 0b1111000) {
 				this.move(this.selectedPiece.index, piece.index);
 			} else if (piece.black === !!(position.player & 0b010000)) {
 				this.selectedPiece = piece;
@@ -282,6 +324,26 @@ var appVm = new Vue({
 			this.move_(this.promotionSelect.fromIdx, this.promotionSelect.toIdx, false);
 			this.promotionSelect.show = false;
 		},
+		initPosition(id) {
+			position = positionBook.getPosition(id);
+
+			this.gameMode = "free";
+			this.promotionSelect.show = false;
+			this.gameResult = null;
+			this.draw();
+			this.sound && sound.gameStart();
+		},
+		printBoard() {
+			console.log(position.toString());
+		},
+		selfMatch() {
+			this.gameMove = "free";
+			var f = () => setTimeout(this.moveByAI.bind(this, f), 500);
+			setTimeout(f, 100);
+		},
+		hoge() {
+			console.dir(ai.think1(position, +this.aiParameter.searchDepth).sort((x, y)=>x[2] === y[2] ? 0 : (x[2] < y[2] ? 1 : -1)));
+		},
 	},
 	components: {
 		"piece": pieceComponent,
@@ -289,7 +351,8 @@ var appVm = new Vue({
 });
 
 
-searchDepth = +getUrlParameter("sd", searchDepth);
+appVm.aiParameter.searchDepth = +getUrlParameter("sd", appVm.aiParameter.searchDepth);
+appVm.aiParameter.randomness = +getUrlParameter("rn", appVm.aiParameter.randomness);
 appVm.enableDebug = !!getUrlParameter("debug", false);
 appVm.init();
 
